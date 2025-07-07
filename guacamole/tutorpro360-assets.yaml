@@ -1,0 +1,306 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tutorpro360-assets
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: tutorpro360
+    app.kubernetes.io/component: assets
+data:
+  # TutorPro360 Logo SVG
+  logo.svg: |
+    <svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#2143AF;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#00BCD4;stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <rect width="200" height="60" fill="url(#logoGradient)" rx="8"/>
+      <text x="15" y="25" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="bold">TutorPro360</text>
+      <text x="15" y="42" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="11">Educational Remote Access</text>
+      <circle cx="170" cy="30" r="18" fill="#00BCD4" stroke="white" stroke-width="2"/>
+      <text x="162" y="36" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">360</text>
+    </svg>
+
+  # Favicon ICO (base64 encoded)
+  favicon.ico: |
+    data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAABILAAASCwAAAAAAAAAAAAD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///wA
+
+  # Background image (base64 encoded educational pattern)
+  background.jpg: |
+    data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k=
+
+  # Custom CSS for complete theme override
+  tutorpro360-theme.css: |
+    /* TutorPro360 Complete Theme CSS */
+
+    /* Global Variables */
+    :root {
+        --tutorpro-primary: #2143AF;
+        --tutorpro-secondary: #00BCD4;
+        --tutorpro-accent: #FF6B35;
+        --tutorpro-background: #f5f7fa;
+        --tutorpro-text: #333333;
+        --tutorpro-light: #ffffff;
+        --tutorpro-shadow: rgba(33, 67, 175, 0.15);
+    }
+
+    /* Reset and Base Styles */
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        background-attachment: fixed !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        min-height: 100vh !important;
+    }
+
+    /* Hide original Guacamole branding */
+    .home-logo,
+    .login-logo,
+    .header-logo,
+    .brand,
+    .logo,
+    .guac-logo {
+        display: none !important;
+    }
+
+    /* Login Page Styles */
+    .login-ui {
+        background: transparent !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-height: 100vh !important;
+        padding: 20px !important;
+    }
+
+    .login-dialog {
+        background: rgba(255, 255, 255, 0.95) !important;
+        border-radius: 20px !important;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3) !important;
+        padding: 0 !important;
+        width: 100% !important;
+        max-width: 450px !important;
+        overflow: hidden !important;
+        backdrop-filter: blur(10px) !important;
+        border: none !important;
+    }
+
+    /* Custom Header for Login */
+    .login-dialog::before {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 120px;
+        background: linear-gradient(135deg, var(--tutorpro-primary) 0%, var(--tutorpro-secondary) 100%);
+        position: relative;
+    }
+
+    .login-dialog::after {
+        content: '🎓 TutorPro360\AEducational Remote Access Platform';
+        white-space: pre;
+        position: absolute;
+        top: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        z-index: 10;
+    }
+
+    /* Form Styling */
+    .login-dialog form {
+        padding: 40px 30px !important;
+        position: relative;
+        z-index: 5;
+    }
+
+    .login-dialog input[type="text"],
+    .login-dialog input[type="password"] {
+        width: 100% !important;
+        padding: 15px !important;
+        border: 2px solid #e1e5e9 !important;
+        border-radius: 10px !important;
+        font-size: 16px !important;
+        background: #f8f9fa !important;
+        transition: all 0.3s ease !important;
+        margin-bottom: 20px !important;
+    }
+
+    .login-dialog input[type="text"]:focus,
+    .login-dialog input[type="password"]:focus {
+        outline: none !important;
+        border-color: var(--tutorpro-primary) !important;
+        background: white !important;
+        box-shadow: 0 0 0 3px var(--tutorpro-shadow) !important;
+    }
+
+    .login-dialog input[type="submit"],
+    .login-dialog button[type="submit"] {
+        width: 100% !important;
+        padding: 15px !important;
+        background: linear-gradient(135deg, var(--tutorpro-primary) 0%, var(--tutorpro-secondary) 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 10px !important;
+        font-size: 16px !important;
+        font-weight: 600 !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1px !important;
+    }
+
+    .login-dialog input[type="submit"]:hover,
+    .login-dialog button[type="submit"]:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 25px var(--tutorpro-shadow) !important;
+    }
+
+    /* Main Interface Styles */
+    .header {
+        background: linear-gradient(135deg, var(--tutorpro-primary) 0%, var(--tutorpro-secondary) 100%) !important;
+        border-bottom: 3px solid var(--tutorpro-secondary) !important;
+        padding: 15px 20px !important;
+    }
+
+    .header::before {
+        content: 'TutorPro360 - Educational Remote Access Platform';
+        color: white;
+        font-size: 20px;
+        font-weight: bold;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Button Styling */
+    .button,
+    .btn,
+    button {
+        background-color: var(--tutorpro-primary) !important;
+        border-color: var(--tutorpro-primary) !important;
+        color: white !important;
+        border-radius: 8px !important;
+        padding: 10px 20px !important;
+        font-weight: 500 !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .button:hover,
+    .btn:hover,
+    button:hover {
+        background-color: var(--tutorpro-secondary) !important;
+        border-color: var(--tutorpro-secondary) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 15px var(--tutorpro-shadow) !important;
+    }
+
+    /* Link Styling */
+    a {
+        color: var(--tutorpro-primary) !important;
+        text-decoration: none !important;
+        transition: color 0.3s ease !important;
+    }
+
+    a:hover {
+        color: var(--tutorpro-secondary) !important;
+    }
+
+    /* Content Area */
+    .content,
+    .main-content,
+    main {
+        background: var(--tutorpro-background) !important;
+        min-height: calc(100vh - 80px) !important;
+        padding: 20px !important;
+    }
+
+    /* Cards and Panels */
+    .panel,
+    .card,
+    .connection-group {
+        background: white !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 15px var(--tutorpro-shadow) !important;
+        border: none !important;
+        margin-bottom: 20px !important;
+        overflow: hidden !important;
+    }
+
+    .panel-heading,
+    .card-header {
+        background: linear-gradient(135deg, var(--tutorpro-primary) 0%, var(--tutorpro-secondary) 100%) !important;
+        color: white !important;
+        padding: 15px 20px !important;
+        font-weight: 600 !important;
+        border-bottom: none !important;
+    }
+
+    /* Footer */
+    .footer {
+        background: var(--tutorpro-primary) !important;
+        color: white !important;
+        text-align: center !important;
+        padding: 20px !important;
+    }
+
+    .footer::before {
+        content: 'TutorPro360 Educational Platform - Secure • Reliable • Educational';
+        display: block;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .login-dialog {
+            margin: 10px !important;
+            max-width: none !important;
+        }
+
+        .login-dialog::after {
+            font-size: 20px !important;
+            top: 25px !important;
+        }
+
+        .login-dialog form {
+            padding: 30px 20px !important;
+        }
+    }
+
+    /* Animation for smooth transitions */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-dialog {
+        animation: fadeIn 0.5s ease-out !important;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--tutorpro-primary);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--tutorpro-secondary);
+    }

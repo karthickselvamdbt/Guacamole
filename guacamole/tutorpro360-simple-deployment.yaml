@@ -1,0 +1,195 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tutorpro360-branded
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: tutorpro360
+    app.kubernetes.io/instance: tutorpro360-branded
+    app.kubernetes.io/version: "1.5.4"
+    app.kubernetes.io/component: web-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tutorpro360
+      app.kubernetes.io/instance: tutorpro360-branded
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: tutorpro360
+        app.kubernetes.io/instance: tutorpro360-branded
+        app.kubernetes.io/version: "1.5.4"
+        app.kubernetes.io/component: web-app
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+      volumes:
+      - name: tutorpro360-branding
+        configMap:
+          name: tutorpro360-branding
+      - name: custom-webapp
+        emptyDir: {}
+      initContainers:
+      - name: inject-branding
+        image: guacamole/guacamole:1.5.4
+        command:
+        - sh
+        - -c
+        - |
+          echo "Injecting TutorPro360 branding..."
+          
+          # Copy the original webapp
+          cp -r /opt/guacamole/web/* /tmp/custom-webapp/ 2>/dev/null || true
+          
+          # Create the branding directory
+          mkdir -p /tmp/custom-webapp/app/ext/tutorpro360
+          
+          # Copy branding files
+          cp /tmp/branding/custom.css /tmp/custom-webapp/app/ext/tutorpro360/
+          cp /tmp/branding/custom.js /tmp/custom-webapp/app/ext/tutorpro360/
+          
+          # Create a custom index.html with TutorPro360 branding
+          cat > /tmp/custom-webapp/tutorpro360-inject.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>TutorPro360 - Educational Remote Access</title>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <meta name="description" content="TutorPro360 - Educational Remote Access Platform">
+              <link rel="stylesheet" type="text/css" href="app/ext/tutorpro360/custom.css">
+              <style>
+                  body { 
+                      margin: 0; 
+                      padding: 0; 
+                      font-family: Arial, sans-serif;
+                      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                      min-height: 100vh;
+                  }
+                  .tutorpro360-loader {
+                      position: fixed;
+                      top: 0;
+                      left: 0;
+                      width: 100%;
+                      height: 100%;
+                      background: linear-gradient(135deg, #2143AF 0%, #00BCD4 100%);
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      z-index: 10000;
+                      color: white;
+                      font-size: 24px;
+                      font-weight: bold;
+                  }
+              </style>
+          </head>
+          <body>
+              <div class="tutorpro360-loader" id="tutorpro360-loader">
+                  <div style="text-align: center;">
+                      <div style="font-size: 48px; margin-bottom: 20px;">🎓</div>
+                      <div>TutorPro360</div>
+                      <div style="font-size: 16px; margin-top: 10px;">Educational Remote Access Platform</div>
+                      <div style="font-size: 14px; margin-top: 20px;">Loading...</div>
+                  </div>
+              </div>
+              
+              <script src="app/ext/tutorpro360/custom.js"></script>
+              <script>
+                  // Redirect to the main application after branding is loaded
+                  setTimeout(function() {
+                      document.getElementById('tutorpro360-loader').style.display = 'none';
+                      // Load the main Guacamole interface in an iframe or redirect
+                      window.location.href = '/';
+                  }, 3000);
+              </script>
+          </body>
+          </html>
+          EOF
+          
+          echo "TutorPro360 branding injection complete!"
+          ls -la /tmp/custom-webapp/app/ext/tutorpro360/
+        volumeMounts:
+        - name: tutorpro360-branding
+          mountPath: /tmp/branding
+        - name: custom-webapp
+          mountPath: /tmp/custom-webapp
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+      - name: wait-for-services
+        image: busybox:1.35
+        command:
+        - sh
+        - -c
+        - |
+          until nc -z guacd-service 4822; do sleep 5; done
+          until nc -z postgres-service 5432; do sleep 5; done
+          echo "Services ready!"
+      containers:
+      - name: tutorpro360
+        image: guacamole/guacamole:1.5.4
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: POSTGRESQL_HOSTNAME
+          value: "postgres-service"
+        - name: POSTGRESQL_PORT
+          value: "5432"
+        - name: POSTGRESQL_DATABASE
+          value: "guacamole_db"
+        - name: POSTGRESQL_USER
+          value: "postgres"
+        - name: POSTGRESQL_PASSWORD
+          value: "postgresadmin123"
+        - name: GUACD_HOSTNAME
+          value: "guacd-service"
+        - name: GUACD_PORT
+          value: "4822"
+        - name: WEBAPP_CONTEXT
+          value: "ROOT"
+        - name: LOGBACK_LEVEL
+          value: "INFO"
+        - name: JAVA_OPTS
+          value: "-Xmx1024m -Xms512m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Djava.security.egd=file:/dev/./urandom -Dguacamole.application.title=TutorPro360 -Dguacamole.brand.name=TutorPro360"
+        volumeMounts:
+        - name: custom-webapp
+          mountPath: /usr/local/tomcat/webapps/ROOT/app/ext/tutorpro360
+          subPath: app/ext/tutorpro360
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          capabilities:
+            drop:
+            - ALL
+      restartPolicy: Always

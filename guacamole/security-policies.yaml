@@ -1,0 +1,63 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: guacamole-network-policy
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: guacamole
+    app.kubernetes.io/component: security
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow ingress traffic to Guacamole web app from anywhere
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: guacamole
+    ports:
+    - protocol: TCP
+      port: 8080
+  # Allow ingress traffic to guacd from Guacamole only
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: guacd
+    from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: guacamole
+    ports:
+    - protocol: TCP
+      port: 4822
+  # Allow ingress traffic to PostgreSQL from Guacamole and init job only
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: postgres
+    from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: guacamole
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: guacamole-db-init
+    ports:
+    - protocol: TCP
+      port: 5432
+  egress:
+  # Allow all egress for external connections (RDP, SSH, VNC, etc.)
+  - {}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: guacamole-sa
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: guacamole
+    app.kubernetes.io/instance: guacamole
+    app.kubernetes.io/component: service-account
+automountServiceAccountToken: false

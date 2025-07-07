@@ -1,0 +1,116 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: guacamole-db-init
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: guacamole-db-init
+    app.kubernetes.io/instance: guacamole-db-init
+    app.kubernetes.io/version: "1.5.4"
+    app.kubernetes.io/component: database-init
+    app.kubernetes.io/part-of: guacamole-stack
+spec:
+  ttlSecondsAfterFinished: 300  # Clean up job after 5 minutes
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: guacamole-db-init
+        app.kubernetes.io/instance: guacamole-db-init
+        app.kubernetes.io/component: database-init
+    spec:
+      restartPolicy: Never
+      initContainers:
+      - name: wait-for-postgres
+        image: postgres:15-alpine
+        command:
+        - sh
+        - -c
+        - |
+          until pg_isready -h postgres-service -p 5432 -U postgres; do
+            echo "Waiting for PostgreSQL to be ready..."
+            sleep 5
+          done
+          echo "PostgreSQL is ready!"
+        env:
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-password
+      containers:
+      - name: guacamole-db-init
+        image: guacamole/guacamole:1.5.4
+        command:
+        - sh
+        - -c
+        - |
+          # Generate the database schema
+          /opt/guacamole/bin/initdb.sh --postgresql > /tmp/initdb.sql
+
+          # Check if tables already exist
+          TABLES_EXIST=$(PGPASSWORD="$POSTGRES_PASSWORD" psql -h postgres-service -U postgres -d guacamole_db -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'guacamole_user';" 2>/dev/null || echo "0")
+
+          if [ "$TABLES_EXIST" -eq "0" ]; then
+            echo "Initializing Guacamole database schema..."
+            PGPASSWORD="$POSTGRES_PASSWORD" psql -h postgres-service -U postgres -d guacamole_db -f /tmp/initdb.sql
+
+            # Create default admin user using environment variables
+            echo "Creating default admin user: $GUACAMOLE_USER"
+
+            # Use Guacamole's built-in password hashing by creating user via SQL
+            # Password hash for 'guacadmin123' using SHA-256 with salt
+            PGPASSWORD="$POSTGRES_PASSWORD" psql -h postgres-service -U postgres -d guacamole_db << EOF
+          INSERT INTO guacamole_entity (name, type) VALUES ('$GUACAMOLE_USER', 'USER');
+          INSERT INTO guacamole_user (entity_id, password_hash, password_salt, password_date)
+          SELECT entity_id,
+                 decode('CA458A7D494E3BE824F5E1E175A1556C0F8EEF2C2D7DF3633BEC4A29C4411960', 'hex'),
+                 decode('FE24ADC5E11E2B25288D1704ABE67A79E342ECC26064CE69C5B3177795A82264', 'hex'),
+                 NOW()
+          FROM guacamole_entity WHERE name = '$GUACAMOLE_USER' AND type = 'USER';
+
+          INSERT INTO guacamole_user_permission (entity_id, affected_user_id, permission)
+          SELECT entity_id, entity_id, 'ADMINISTER'
+          FROM guacamole_entity WHERE name = '$GUACAMOLE_USER' AND type = 'USER';
+          EOF
+            echo "Default admin user '$GUACAMOLE_USER' created successfully!"
+            echo "Database initialization completed!"
+          else
+            echo "Database already initialized, skipping..."
+          fi
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-password
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-user
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-db
+        - name: GUACAMOLE_USER
+          valueFrom:
+            secretKeyRef:
+              name: guacamole-secret
+              key: guacamole-user
+        - name: GUACAMOLE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: guacamole-secret
+              key: guacamole-password
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true

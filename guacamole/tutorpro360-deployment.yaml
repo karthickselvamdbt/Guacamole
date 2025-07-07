@@ -1,0 +1,195 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tutorpro360
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: tutorpro360
+    app.kubernetes.io/instance: tutorpro360
+    app.kubernetes.io/version: "1.5.4"
+    app.kubernetes.io/component: web-app
+    app.kubernetes.io/part-of: tutorpro360-stack
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tutorpro360
+      app.kubernetes.io/instance: tutorpro360
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: tutorpro360
+        app.kubernetes.io/instance: tutorpro360
+        app.kubernetes.io/version: "1.5.4"
+        app.kubernetes.io/component: web-app
+        app.kubernetes.io/part-of: tutorpro360-stack
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/"
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+      - name: tutorpro360-config
+        configMap:
+          name: tutorpro360-config
+      - name: tutorpro360-branding
+        configMap:
+          name: tutorpro360-branding
+      - name: guacamole-web
+        emptyDir: {}
+      initContainers:
+      - name: setup-branding
+        image: guacamole/guacamole:1.5.4
+        command:
+        - sh
+        - -c
+        - |
+          echo "Setting up TutorPro360 branding..."
+          mkdir -p /tmp/guacamole-web/app/ext/tutorpro360
+          mkdir -p /tmp/guacamole-web/images
+          
+          # Copy custom CSS and JS
+          cp /tmp/branding/custom.css /tmp/guacamole-web/app/ext/tutorpro360/
+          cp /tmp/branding/custom.js /tmp/guacamole-web/app/ext/tutorpro360/
+          
+          # Create custom logo SVG file
+          cat > /tmp/guacamole-web/images/logo.svg << 'EOF'
+          <svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="60" fill="#2143AF" rx="8"/>
+          <text x="10" y="20" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">TutorPro360</text>
+          <text x="10" y="38" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="10">Educational Remote Access</text>
+          <circle cx="170" cy="30" r="15" fill="#00BCD4"/>
+          <text x="165" y="35" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">360</text>
+          </svg>
+          EOF
+          
+          # Create favicon
+          cat > /tmp/guacamole-web/images/favicon.ico << 'EOF'
+          # Placeholder for favicon - would need actual binary data
+          EOF
+          
+          echo "TutorPro360 branding setup complete!"
+          ls -la /tmp/guacamole-web/app/ext/tutorpro360/
+          ls -la /tmp/guacamole-web/images/
+        volumeMounts:
+        - name: tutorpro360-branding
+          mountPath: /tmp/branding
+        - name: guacamole-web
+          mountPath: /tmp/guacamole-web
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+      - name: wait-for-guacd
+        image: busybox:1.35
+        command:
+        - sh
+        - -c
+        - |
+          until nc -z guacd-service 4822; do
+            echo "Waiting for guacd service..."
+            sleep 5
+          done
+          echo "Guacd service is ready!"
+      - name: wait-for-postgres
+        image: postgres:15-alpine
+        command:
+        - sh
+        - -c
+        - |
+          until pg_isready -h postgres-service -p 5432 -U postgres; do
+            echo "Waiting for PostgreSQL to be ready..."
+            sleep 5
+          done
+          echo "PostgreSQL is ready!"
+        env:
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-password
+      containers:
+      - name: tutorpro360
+        image: guacamole/guacamole:1.5.4
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: POSTGRESQL_HOSTNAME
+          value: "postgres-service"
+        - name: POSTGRESQL_PORT
+          value: "5432"
+        - name: POSTGRESQL_DATABASE
+          value: "guacamole_db"
+        - name: POSTGRESQL_USER
+          value: "postgres"
+        - name: POSTGRESQL_PASSWORD
+          value: "postgresadmin123"
+        - name: GUACD_HOSTNAME
+          value: "guacd-service"
+        - name: GUACD_PORT
+          value: "4822"
+        - name: WEBAPP_CONTEXT
+          value: "ROOT"
+        - name: GUACAMOLE_HOME
+          value: "/etc/guacamole"
+        - name: LOGBACK_LEVEL
+          value: "INFO"
+        - name: JAVA_OPTS
+          value: "-Xmx1024m -Xms512m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Djava.security.egd=file:/dev/./urandom -Dguacamole.application.title=TutorPro360"
+        volumeMounts:
+        - name: tutorpro360-config
+          mountPath: /etc/guacamole
+        - name: guacamole-web
+          mountPath: /usr/local/tomcat/webapps/ROOT/app/ext/tutorpro360
+          subPath: app/ext/tutorpro360
+        - name: guacamole-web
+          mountPath: /usr/local/tomcat/webapps/ROOT/images
+          subPath: images
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          capabilities:
+            drop:
+            - ALL
+      restartPolicy: Always

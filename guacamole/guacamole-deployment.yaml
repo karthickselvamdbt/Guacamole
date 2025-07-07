@@ -1,0 +1,202 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: guacamole
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: guacamole
+    app.kubernetes.io/instance: guacamole
+    app.kubernetes.io/version: "1.5.4"
+    app.kubernetes.io/component: web-app
+    app.kubernetes.io/part-of: guacamole-stack
+spec:
+  replicas: 2  # Multiple replicas for high availability
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: guacamole
+      app.kubernetes.io/instance: guacamole
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: guacamole
+        app.kubernetes.io/instance: guacamole
+        app.kubernetes.io/version: "1.5.4"
+        app.kubernetes.io/component: web-app
+        app.kubernetes.io/part-of: guacamole-stack
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/guacamole"
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+      - name: wait-for-guacd
+        image: busybox:1.35
+        command:
+        - sh
+        - -c
+        - |
+          until nc -z guacd-service 4822; do
+            echo "Waiting for guacd service..."
+            sleep 5
+          done
+          echo "Guacd service is ready!"
+      - name: wait-for-postgres
+        image: postgres:15-alpine
+        command:
+        - sh
+        - -c
+        - |
+          until pg_isready -h postgres-service -p 5432 -U postgres; do
+            echo "Waiting for PostgreSQL to be ready..."
+            sleep 5
+          done
+          echo "PostgreSQL is ready!"
+        env:
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-password
+      - name: copy-postgres-extension
+        image: guacamole/guacamole:1.5.4
+        command:
+        - sh
+        - -c
+        - |
+          echo "Copying PostgreSQL authentication extension..."
+          cp /opt/guacamole/postgresql/guacamole-auth-jdbc-postgresql-1.5.4.jar /tmp/extensions/
+          echo "Extension copied successfully!"
+        volumeMounts:
+        - name: guacamole-extensions
+          mountPath: /tmp/extensions
+      - name: copy-postgres-driver
+        image: guacamole/guacamole:1.5.4
+        command:
+        - sh
+        - -c
+        - |
+          echo "Creating symbolic link for PostgreSQL driver in Tomcat lib..."
+          cp /opt/guacamole/postgresql/postgresql-42.6.0.jar /tmp/tomcat-lib/
+          echo "Driver copied successfully!"
+        volumeMounts:
+        - name: tomcat-lib-shared
+          mountPath: /tmp/tomcat-lib
+      containers:
+      - name: guacamole
+        image: guacamole/guacamole:1.5.4
+        command:
+        - sh
+        - -c
+        - |
+          echo "Copying PostgreSQL driver to Tomcat lib directory..."
+          cp /usr/local/tomcat/lib-shared/postgresql-42.6.0.jar /usr/local/tomcat/lib/
+          echo "Starting Guacamole..."
+          exec catalina.sh run
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: POSTGRESQL_HOSTNAME
+          value: "postgres-service"
+        - name: POSTGRESQL_PORT
+          value: "5432"
+        - name: POSTGRESQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-db
+        - name: POSTGRESQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-user
+        - name: POSTGRESQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-password
+        - name: GUACD_HOSTNAME
+          value: "guacd-service"
+        - name: GUACD_PORT
+          value: "4822"
+        - name: WEBAPP_CONTEXT
+          value: "ROOT"
+        # Additional production settings
+        - name: LOGBACK_LEVEL
+          value: "INFO"
+        - name: HOME
+          value: "/tmp"
+        - name: JAVA_OPTS
+          value: "-Xmx1024m -Xms512m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Djava.security.egd=file:/dev/./urandom"
+        volumeMounts:
+        - name: guacamole-config
+          mountPath: /etc/guacamole/guacamole.properties
+          subPath: guacamole.properties
+        - name: guacamole-config
+          mountPath: /usr/local/tomcat/conf/server.xml
+          subPath: server.xml
+        - name: guacamole-extensions
+          mountPath: /etc/guacamole/extensions
+        - name: tomcat-lib-shared
+          mountPath: /usr/local/tomcat/lib-shared
+        - name: tmp
+          mountPath: /tmp
+        - name: var-tmp
+          mountPath: /var/tmp
+        - name: tomcat-work
+          mountPath: /usr/local/tomcat/work
+        - name: tomcat-logs
+          mountPath: /usr/local/tomcat/logs
+        livenessProbe:
+          httpGet:
+            path: /api/languages
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /api/languages
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: guacamole-config
+        configMap:
+          name: guacamole-config
+      - name: guacamole-extensions
+        emptyDir: {}
+      - name: tomcat-lib-shared
+        emptyDir: {}
+      - name: tmp
+        emptyDir: {}
+      - name: var-tmp
+        emptyDir: {}
+      - name: tomcat-work
+        emptyDir: {}
+      - name: tomcat-logs
+        emptyDir: {}
+      restartPolicy: Always

@@ -1,0 +1,211 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tutorpro360-enhanced
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: tutorpro360
+    app.kubernetes.io/instance: tutorpro360-enhanced
+    app.kubernetes.io/version: "1.5.4"
+    app.kubernetes.io/component: web-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tutorpro360
+      app.kubernetes.io/instance: tutorpro360-enhanced
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: tutorpro360
+        app.kubernetes.io/instance: tutorpro360-enhanced
+        app.kubernetes.io/version: "1.5.4"
+        app.kubernetes.io/component: web-app
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/"
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+      volumes:
+      - name: tutorpro360-branding
+        configMap:
+          name: tutorpro360-branding
+      - name: webapp-root
+        emptyDir: {}
+      initContainers:
+      - name: setup-tutorpro360-branding
+        image: guacamole/guacamole:1.5.4
+        command:
+        - sh
+        - -c
+        - |
+          echo "Setting up TutorPro360 branding injection..."
+          
+          # Extract the original WAR file
+          cd /usr/local/tomcat/webapps
+          cp ROOT.war /tmp/
+          cd /tmp
+          mkdir -p webapp-extract
+          cd webapp-extract
+          jar -xf ../ROOT.war
+          
+          # Create branding directory
+          mkdir -p app/ext/tutorpro360
+          
+          # Copy custom CSS and JS
+          cp /tmp/branding/custom.css app/ext/tutorpro360/
+          cp /tmp/branding/custom.js app/ext/tutorpro360/
+          
+          # Inject CSS and JS into index.html
+          if [ -f index.html ]; then
+            # Add CSS link before closing head tag
+            sed -i 's|</head>|<link rel="stylesheet" type="text/css" href="app/ext/tutorpro360/custom.css">\n</head>|g' index.html
+            
+            # Add JS script before closing body tag
+            sed -i 's|</body>|<script src="app/ext/tutorpro360/custom.js"></script>\n</body>|g' index.html
+            
+            echo "Injected TutorPro360 branding into index.html"
+          fi
+          
+          # Find and modify any HTML files that might contain the interface
+          find . -name "*.html" -type f | while read htmlfile; do
+            if [ "$htmlfile" != "./index.html" ]; then
+              sed -i 's|</head>|<link rel="stylesheet" type="text/css" href="../app/ext/tutorpro360/custom.css">\n</head>|g' "$htmlfile"
+              sed -i 's|</body>|<script src="../app/ext/tutorpro360/custom.js"></script>\n</body>|g' "$htmlfile"
+            fi
+          done
+          
+          # Create a custom index.html with TutorPro360 branding if original doesn't exist
+          if [ ! -f index.html ]; then
+            cat > index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>TutorPro360 - Educational Remote Access</title>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <meta name="description" content="TutorPro360 - Educational Remote Access Platform">
+              <link rel="stylesheet" type="text/css" href="app/ext/tutorpro360/custom.css">
+              <style>
+                  body { 
+                      margin: 0; 
+                      padding: 0; 
+                      font-family: Arial, sans-serif;
+                      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                      min-height: 100vh;
+                  }
+              </style>
+          </head>
+          <body>
+              <div id="app"></div>
+              <script src="app/ext/tutorpro360/custom.js"></script>
+          </body>
+          </html>
+          EOF
+          fi
+          
+          # Copy everything to the webapp volume
+          cp -r * /tmp/webapp-root/
+          
+          echo "TutorPro360 branding setup complete!"
+          ls -la /tmp/webapp-root/app/ext/tutorpro360/
+        volumeMounts:
+        - name: tutorpro360-branding
+          mountPath: /tmp/branding
+        - name: webapp-root
+          mountPath: /tmp/webapp-root
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+      - name: wait-for-services
+        image: busybox:1.35
+        command:
+        - sh
+        - -c
+        - |
+          echo "Waiting for required services..."
+          until nc -z guacd-service 4822; do
+            echo "Waiting for guacd service..."
+            sleep 5
+          done
+          until nc -z postgres-service 5432; do
+            echo "Waiting for postgres service..."
+            sleep 5
+          done
+          echo "All services are ready!"
+      containers:
+      - name: tutorpro360
+        image: guacamole/guacamole:1.5.4
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: POSTGRESQL_HOSTNAME
+          value: "postgres-service"
+        - name: POSTGRESQL_PORT
+          value: "5432"
+        - name: POSTGRESQL_DATABASE
+          value: "guacamole_db"
+        - name: POSTGRESQL_USER
+          value: "postgres"
+        - name: POSTGRESQL_PASSWORD
+          value: "postgresadmin123"
+        - name: GUACD_HOSTNAME
+          value: "guacd-service"
+        - name: GUACD_PORT
+          value: "4822"
+        - name: WEBAPP_CONTEXT
+          value: "ROOT"
+        - name: LOGBACK_LEVEL
+          value: "INFO"
+        - name: JAVA_OPTS
+          value: "-Xmx1024m -Xms512m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Djava.security.egd=file:/dev/./urandom -Dguacamole.application.title=TutorPro360"
+        volumeMounts:
+        - name: webapp-root
+          mountPath: /usr/local/tomcat/webapps/ROOT
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          capabilities:
+            drop:
+            - ALL
+      restartPolicy: Always

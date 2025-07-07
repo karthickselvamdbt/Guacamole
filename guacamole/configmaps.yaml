@@ -1,0 +1,100 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/instance: postgres
+    app.kubernetes.io/component: database
+data:
+  postgresql.conf: |
+    # PostgreSQL configuration for production
+    listen_addresses = '*'
+    max_connections = 200
+    shared_buffers = 256MB
+    effective_cache_size = 1GB
+    maintenance_work_mem = 64MB
+    checkpoint_completion_target = 0.9
+    wal_buffers = 16MB
+    default_statistics_target = 100
+    random_page_cost = 1.1
+    effective_io_concurrency = 200
+    work_mem = 4MB
+    min_wal_size = 1GB
+    max_wal_size = 4GB
+    
+    # Logging
+    log_destination = 'stderr'
+    logging_collector = on
+    log_directory = 'log'
+    log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'
+    log_rotation_age = 1d
+    log_rotation_size = 100MB
+    log_min_duration_statement = 1000
+    log_line_prefix = '%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
+    
+    # Security
+    ssl = off
+    password_encryption = scram-sha-256
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: guacamole-config
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: guacamole
+    app.kubernetes.io/instance: guacamole
+    app.kubernetes.io/component: web-app
+data:
+  guacamole.properties: |
+    # PostgreSQL configuration - credentials loaded via environment variables
+    postgresql-hostname: postgres-service
+    postgresql-port: 5432
+    # Database name, username, and password are set via environment variables
+    # POSTGRESQL_DATABASE, POSTGRESQL_USER, POSTGRESQL_PASSWORD
+
+    # Guacd configuration
+    guacd-hostname: guacd-service
+    guacd-port: 4822
+
+    # Additional security settings
+    postgresql-auto-create-accounts: false
+    postgresql-default-max-connections: 0
+    postgresql-default-max-group-connections: 0
+
+    # Session timeout (30 minutes)
+    api-session-timeout: 30
+
+    # Enable extension support
+    extension-priority: postgresql
+
+    # Security enhancements
+    skip-if-unavailable: postgresql
+  
+  server.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <Server port="8005" shutdown="SHUTDOWN">
+      <Service name="Catalina">
+        <Connector port="8080" 
+                   protocol="HTTP/1.1"
+                   connectionTimeout="20000"
+                   redirectPort="8443"
+                   maxThreads="200"
+                   minSpareThreads="10"
+                   enableLookups="false"
+                   acceptCount="100"
+                   compression="on"
+                   compressableMimeType="text/html,text/xml,text/javascript,text/css,text/plain,application/javascript,application/json"/>
+        <Engine name="Catalina" defaultHost="localhost">
+          <Host name="localhost" appBase="webapps" unpackWARs="true" autoDeploy="false">
+            <Valve className="org.apache.catalina.valves.AccessLogValve"
+                   directory="logs"
+                   prefix="access_log"
+                   suffix=".txt"
+                   pattern='%h %l %u %t "%r" %s %b "%{Referer}i" "%{User-Agent}i" %D'/>
+          </Host>
+        </Engine>
+      </Service>
+    </Server>

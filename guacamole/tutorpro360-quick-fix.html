@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TutorPro360 Quick Home Page Fix</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #2143AF 0%, #00BCD4 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(33, 67, 175, 0.3);
+        }
+        .urgent {
+            background: #ff4757;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            border-top: 5px solid #2143AF;
+        }
+        .bookmarklet {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 3px dashed #2143AF;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 25px 0;
+        }
+        .bookmarklet a {
+            display: inline-block;
+            background: linear-gradient(135deg, #2143AF 0%, #00BCD4 100%);
+            color: white;
+            padding: 20px 40px;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 18px;
+            margin: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(33, 67, 175, 0.3);
+        }
+        .bookmarklet a:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(33, 67, 175, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+        .step {
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            border-left: 4px solid #2143AF;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .access-button {
+            display: block;
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            padding: 20px 40px;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 20px;
+            text-align: center;
+            margin: 20px auto;
+            max-width: 400px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+        .access-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎓 TutorPro360 Home Page Fix</h1>
+        <p>Quick solution to replace the ID with TutorPro360 branding</p>
+    </div>
+
+    <div class="urgent">
+        🚨 QUICK FIX: Replace "12783445-18a7-4ad0-b58d-ee0172d01619" with TutorPro360 branding
+    </div>
+
+    <div class="card">
+        <h2>🚀 Instant Home Page Fix</h2>
+        <p>This bookmarklet will immediately replace the ID showing on your home page with proper TutorPro360 branding:</p>
+        
+        <div class="bookmarklet">
+            <h3>📌 Drag this button to your bookmarks bar:</h3>
+            <a href="javascript:(function(){document.title='TutorPro360 - Educational Remote Access Platform';const existingElements=document.querySelectorAll('[id^=\"tutorpro360\"]');existingElements.forEach(el=>el.remove());const header=document.createElement('div');header.id='tutorpro360-main-header';header.innerHTML=`<div style=\"position:fixed;top:0;left:0;right:0;height:80px;background:linear-gradient(135deg,#2143AF 0%,#00BCD4 100%);z-index:9999;display:flex;align-items:center;padding:0 30px;box-shadow:0 4px 20px rgba(0,0,0,0.15);font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;\"><div style=\"display:flex;align-items:center;gap:20px;\"><div style=\"width:60px;height:60px;background:#00BCD4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;color:white;font-size:18px;box-shadow:0 4px 15px rgba(0,0,0,0.2);\">360</div><div><h1 style=\"margin:0;color:white;font-size:32px;font-weight:bold;text-shadow:2px 2px 4px rgba(0,0,0,0.3);\">TutorPro360</h1><p style=\"margin:0;color:rgba(255,255,255,0.9);font-size:16px;font-weight:300;\">Educational Remote Access Platform</p></div></div><div style=\"margin-left:auto;color:white;font-size:14px;\">🎓 Secure • Reliable • Educational</div></div>`;document.body.insertBefore(header,document.body.firstChild);document.body.style.paddingTop='100px';document.body.style.background='linear-gradient(135deg,#f5f7fa 0%,#c3cfe2 100%)';document.body.style.minHeight='100vh';document.body.style.fontFamily=\"'Segoe UI',Tahoma,Geneva,Verdana,sans-serif\";const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null,false);let node;while(node=walker.nextNode()){let text=node.textContent;if(text.includes('12783445-18a7-4ad0-b58d-ee0172d01619')){text=text.replace(/12783445-18a7-4ad0-b58d-ee0172d01619/g,'TutorPro360');}if(text.includes('Guacamole')){text=text.replace(/Apache Guacamole/gi,'TutorPro360');text=text.replace(/Guacamole/gi,'TutorPro360');}if(text!==node.textContent){node.textContent=text;}}const elementsToHide=document.querySelectorAll('*');elementsToHide.forEach(el=>{if(el.textContent&&el.textContent.includes('12783445-18a7-4ad0-b58d-ee0172d01619')){el.style.display='none';}});console.log('✅ TutorPro360 home page fix applied!');alert('✅ TutorPro360 branding applied! The page should now show TutorPro360 instead of the ID.');})();">
+                🎓 Fix TutorPro360 Home Page
+            </a>
+            <p style="margin-top: 20px; color: #666; font-size: 14px;">
+                <strong>This will:</strong> Replace the ID with TutorPro360, add custom header, and apply branding
+            </p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>📋 How to Use</h2>
+        <div class="step">
+            <span style="font-size: 28px; margin-right: 15px;">1️⃣</span>
+            <strong>Drag the "Fix TutorPro360 Home Page" button above to your bookmarks bar</strong>
+        </div>
+        <div class="step">
+            <span style="font-size: 28px; margin-right: 15px;">2️⃣</span>
+            <strong>Open your TutorPro360 platform</strong> (button below)
+        </div>
+        <div class="step">
+            <span style="font-size: 28px; margin-right: 15px;">3️⃣</span>
+            <strong>Click the bookmarklet</strong> to instantly fix the home page
+        </div>
+        <div class="step">
+            <span style="font-size: 28px; margin-right: 15px;">4️⃣</span>
+            <strong>The ID will be replaced with TutorPro360 branding!</strong>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🌐 Open Your Platform</h2>
+        <p style="text-align: center; font-size: 18px; margin-bottom: 30px;">
+            Click here to open your TutorPro360 platform, then use the bookmarklet:
+        </p>
+        
+        <a href="http://10.0.7.161:30360" target="_blank" class="access-button">
+            🚀 Open TutorPro360 Platform
+        </a>
+        
+        <div style="text-align: center; margin-top: 25px;">
+            <p><strong>Alternative URLs:</strong></p>
+            <p>
+                <a href="http://10.0.7.162:30360" target="_blank">http://10.0.7.162:30360</a> | 
+                <a href="http://10.0.7.163:30360" target="_blank">http://10.0.7.163:30360</a>
+            </p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-top: 25px; text-align: center;">
+            <h4 style="color: #2143AF; margin-top: 0;">🔐 Login Credentials</h4>
+            <p style="font-size: 16px; margin: 10px 0;">
+                <strong>Username:</strong> <code onclick="copyToClipboard('guacadmin')" style="cursor: pointer; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">guacadmin</code><br>
+                <strong>Password:</strong> <code onclick="copyToClipboard('guacadmin')" style="cursor: pointer; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">guacadmin</code>
+            </p>
+            <p style="color: #666; font-size: 12px;">Click credentials to copy</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🎯 What This Fix Does</h2>
+        <ul style="font-size: 16px; line-height: 1.8;">
+            <li><strong>Replaces the ID:</strong> Changes "12783445-18a7-4ad0-b58d-ee0172d01619" to "TutorPro360"</li>
+            <li><strong>Adds Custom Header:</strong> Beautiful TutorPro360 header with logo and branding</li>
+            <li><strong>Applies Theme:</strong> Educational blue and cyan color scheme</li>
+            <li><strong>Replaces Text:</strong> All "Guacamole" references become "TutorPro360"</li>
+            <li><strong>Hides Old Elements:</strong> Hides any elements containing the old ID</li>
+            <li><strong>Professional Look:</strong> Makes the interface look like a proper educational platform</li>
+        </ul>
+    </div>
+
+    <div class="card" style="text-align: center; background: linear-gradient(135deg, #2143AF 0%, #00BCD4 100%); color: white;">
+        <h2 style="color: white;">🎉 Ready to Fix Your Home Page!</h2>
+        <p style="font-size: 18px; opacity: 0.9;">
+            Use the bookmarklet above to instantly transform your home page from showing the ID to displaying proper TutorPro360 branding.
+        </p>
+    </div>
+
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied: ' + text);
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('Copied: ' + text);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+    "guacamoleVersion": "1.5.4",
+    "name": "TutorPro360 Educational Branding",
+    "namespace": "tutorpro360-branding",
+    "description": "TutorPro360 educational platform branding extension for Apache Guacamole login screen customization",
+    "version": "1.0.0",
+    "author": "TutorPro360 Team",
+    "license": "GPL-3.0",
+    
+    "css": [
+        "css/tutorpro360-login.css"
+    ],
+    
+    "resources": {
+        "images/tutorpro360-logo.png": "image/png",
+        "images/tutorpro360-background.jpg": "image/jpeg",
+        "images/tutorpro360-favicon.ico": "image/x-icon"
+    },
+    
+    "translations": [
+        "translations/en.json"
+    ],
+    
+    "html": {
+        "loginScreen": {
+            "title": "TutorPro360 - Educational Remote Access",
+            "subtitle": "Secure Educational Platform"
+        }
+    }
+}

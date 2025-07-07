@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: guacamole
+  labels:
+    name: guacamole
+    app.kubernetes.io/name: guacamole
+    app.kubernetes.io/instance: guacamole
+    app.kubernetes.io/version: "1.5.4"
+    app.kubernetes.io/component: remote-desktop
+    app.kubernetes.io/part-of: guacamole-stack

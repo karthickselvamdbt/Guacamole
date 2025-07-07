@@ -1,0 +1,325 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tutorpro360-extension
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: tutorpro360
+    app.kubernetes.io/component: extension
+data:
+  # Guacamole manifest
+  guac-manifest.json: |
+    {
+        "guacamoleVersion": "1.5.4",
+        "name": "TutorPro360 Educational Branding",
+        "namespace": "tutorpro360-branding",
+        "description": "TutorPro360 educational platform branding extension for Apache Guacamole login screen customization",
+        "version": "1.0.0",
+        "author": "TutorPro360 Team",
+        "license": "GPL-3.0",
+        
+        "css": [
+            "css/tutorpro360-login.css"
+        ],
+        
+        "resources": {
+            "images/tutorpro360-logo.png": "image/png",
+            "images/tutorpro360-background.jpg": "image/jpeg",
+            "images/tutorpro360-favicon.ico": "image/x-icon"
+        },
+        
+        "translations": [
+            "translations/en.json"
+        ],
+        
+        "html": {
+            "loginScreen": {
+                "title": "TutorPro360 - Educational Remote Access",
+                "subtitle": "Secure Educational Platform"
+            }
+        }
+    }
+
+  # Main CSS file (truncated for ConfigMap - full version in separate file)
+  tutorpro360-login.css: |
+    :root {
+        --tutorpro-primary: #2143AF;
+        --tutorpro-secondary: #00BCD4;
+        --tutorpro-gradient: linear-gradient(135deg, #2143AF 0%, #00BCD4 100%);
+        --tutorpro-bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    body {
+        font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+        background: var(--tutorpro-bg-gradient) !important;
+        background-attachment: fixed !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        min-height: 100vh !important;
+    }
+    
+    .login-ui {
+        background: transparent !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-height: 100vh !important;
+        padding: 20px !important;
+    }
+    
+    .login-dialog {
+        background: rgba(255, 255, 255, 0.95) !important;
+        border-radius: 24px !important;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25) !important;
+        padding: 0 !important;
+        width: 100% !important;
+        max-width: 480px !important;
+        overflow: hidden !important;
+        backdrop-filter: blur(20px) !important;
+        border: none !important;
+        position: relative !important;
+    }
+    
+    .login-dialog::before {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 140px;
+        background: var(--tutorpro-gradient);
+        position: relative;
+    }
+    
+    .login-dialog::after {
+        content: '🎓';
+        position: absolute;
+        top: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 48px;
+        z-index: 10;
+    }
+    
+    .login-dialog .login-dialog-middle::before {
+        content: 'TutorPro360';
+        display: block;
+        text-align: center;
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--tutorpro-primary);
+        margin: 20px 0 5px 0;
+    }
+    
+    .login-dialog .login-dialog-middle::after {
+        content: 'Educational Remote Access Platform';
+        display: block;
+        text-align: center;
+        font-size: 16px;
+        color: #666;
+        margin-bottom: 30px;
+    }
+    
+    .login-dialog .logo,
+    .login-dialog .login-logo,
+    .login-dialog h1,
+    .login-dialog .title {
+        display: none !important;
+    }
+    
+    .login-dialog input[type="text"],
+    .login-dialog input[type="password"] {
+        width: 100% !important;
+        padding: 18px 20px !important;
+        border: 2px solid #e1e5e9 !important;
+        border-radius: 12px !important;
+        font-size: 16px !important;
+        background: #f8f9fa !important;
+        transition: all 0.3s ease !important;
+        margin-bottom: 20px !important;
+        box-sizing: border-box !important;
+    }
+    
+    .login-dialog input[type="text"]:focus,
+    .login-dialog input[type="password"]:focus {
+        outline: none !important;
+        border-color: var(--tutorpro-primary) !important;
+        background: white !important;
+        box-shadow: 0 0 0 4px rgba(33, 67, 175, 0.15) !important;
+    }
+    
+    .login-dialog input[type="submit"],
+    .login-dialog button[type="submit"] {
+        width: 100% !important;
+        padding: 18px 20px !important;
+        background: var(--tutorpro-gradient) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 12px !important;
+        font-size: 16px !important;
+        font-weight: 600 !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1px !important;
+    }
+    
+    .login-dialog input[type="submit"]:hover,
+    .login-dialog button[type="submit"]:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 25px rgba(33, 67, 175, 0.3) !important;
+    }
+
+  # Translations
+  en.json: |
+    {
+        "LOGIN": {
+            "TITLE": "TutorPro360 - Educational Remote Access",
+            "WELCOME": "Welcome to TutorPro360",
+            "DESCRIPTION": "Educational Remote Access Platform",
+            "USERNAME": "Username",
+            "PASSWORD": "Password",
+            "LOGIN_BUTTON": "Sign In to TutorPro360",
+            "FOOTER_TEXT": "Secure • Reliable • Educational"
+        }
+    }
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tutorpro360-with-extension
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: tutorpro360
+    app.kubernetes.io/instance: tutorpro360-extension
+    app.kubernetes.io/version: "1.5.4"
+    app.kubernetes.io/component: web-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tutorpro360
+      app.kubernetes.io/instance: tutorpro360-extension
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: tutorpro360
+        app.kubernetes.io/instance: tutorpro360-extension
+        app.kubernetes.io/version: "1.5.4"
+        app.kubernetes.io/component: web-app
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+      volumes:
+      - name: tutorpro360-extension
+        configMap:
+          name: tutorpro360-extension
+      - name: extensions-dir
+        emptyDir: {}
+      initContainers:
+      - name: setup-extension
+        image: guacamole/guacamole:1.5.4
+        command:
+        - sh
+        - -c
+        - |
+          echo "Setting up TutorPro360 extension..."
+          
+          # Create extension directory structure
+          mkdir -p /tmp/extension/css
+          mkdir -p /tmp/extension/images
+          mkdir -p /tmp/extension/translations
+          
+          # Copy extension files
+          cp /tmp/config/guac-manifest.json /tmp/extension/
+          cp /tmp/config/tutorpro360-login.css /tmp/extension/css/
+          cp /tmp/config/en.json /tmp/extension/translations/
+          
+          # Create a simple JAR-like structure (since we can't use jar command)
+          cd /tmp/extension
+          tar -czf /tmp/extensions/tutorpro360-branding.tar.gz *
+          
+          echo "TutorPro360 extension setup complete!"
+          ls -la /tmp/extensions/
+        volumeMounts:
+        - name: tutorpro360-extension
+          mountPath: /tmp/config
+        - name: extensions-dir
+          mountPath: /tmp/extensions
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+      - name: wait-for-services
+        image: busybox:1.35
+        command:
+        - sh
+        - -c
+        - |
+          until nc -z guacd-service 4822; do sleep 5; done
+          until nc -z postgres-service 5432; do sleep 5; done
+          echo "Services ready!"
+      containers:
+      - name: tutorpro360
+        image: guacamole/guacamole:1.5.4
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: POSTGRESQL_HOSTNAME
+          value: "postgres-service"
+        - name: POSTGRESQL_PORT
+          value: "5432"
+        - name: POSTGRESQL_DATABASE
+          value: "guacamole_db"
+        - name: POSTGRESQL_USER
+          value: "postgres"
+        - name: POSTGRESQL_PASSWORD
+          value: "postgresadmin123"
+        - name: GUACD_HOSTNAME
+          value: "guacd-service"
+        - name: GUACD_PORT
+          value: "4822"
+        - name: WEBAPP_CONTEXT
+          value: "ROOT"
+        - name: LOGBACK_LEVEL
+          value: "INFO"
+        - name: JAVA_OPTS
+          value: "-Xmx1024m -Xms512m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Djava.security.egd=file:/dev/./urandom -Dguacamole.application.title=TutorPro360 -Dguacamole.brand.name=TutorPro360"
+        volumeMounts:
+        - name: extensions-dir
+          mountPath: /etc/guacamole/extensions
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          capabilities:
+            drop:
+            - ALL
+      restartPolicy: Always

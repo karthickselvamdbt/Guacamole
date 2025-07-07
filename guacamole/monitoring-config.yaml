@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: monitoring-config
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: monitoring
+    app.kubernetes.io/component: configuration
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+    
+    scrape_configs:
+    - job_name: 'guacamole'
+      kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names:
+          - guacamole
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+        action: keep
+        regex: guacamole
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        target_label: __address__
+      scrape_interval: 30s
+
+    - job_name: 'postgres-exporter'
+      static_configs:
+      - targets: ['postgres-exporter:9187']
+      scrape_interval: 30s
+
+    - job_name: 'kubernetes-pods'
+      kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names:
+          - guacamole
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+  
+  grafana-dashboard.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "Guacamole Monitoring",
+        "description": "Monitoring dashboard for Apache Guacamole",
+        "tags": ["guacamole", "remote-desktop"],
+        "timezone": "browser",
+        "panels": [
+          {
+            "id": 1,
+            "title": "Active Sessions",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "guacamole_active_sessions_total",
+                "legendFormat": "Active Sessions"
+              }
+            ]
+          },
+          {
+            "id": 2,
+            "title": "Connection Attempts",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(guacamole_connection_attempts_total[5m])",
+                "legendFormat": "Connection Attempts/sec"
+              }
+            ]
+          }
+        ],
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "refresh": "5s"
+      }
+    }

@@ -1,0 +1,375 @@
+/*
+ * TutorPro360 Educational Platform - Login Screen Customization
+ * Custom CSS for Apache Guacamole login page branding
+ */
+
+/* Import modern fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* CSS Variables for TutorPro360 Theme */
+:root {
+    --tutorpro-primary: #2143AF;
+    --tutorpro-secondary: #00BCD4;
+    --tutorpro-accent: #FF6B35;
+    --tutorpro-background: #f5f7fa;
+    --tutorpro-text: #333333;
+    --tutorpro-light: #ffffff;
+    --tutorpro-shadow: rgba(33, 67, 175, 0.15);
+    --tutorpro-gradient: linear-gradient(135deg, #2143AF 0%, #00BCD4 100%);
+    --tutorpro-bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Global Body Styling */
+body {
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    background: var(--tutorpro-bg-gradient) !important;
+    background-attachment: fixed !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 100vh !important;
+    overflow-x: hidden !important;
+}
+
+/* Login UI Container */
+.login-ui {
+    background: transparent !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 100vh !important;
+    padding: 20px !important;
+    position: relative !important;
+}
+
+/* Add animated background pattern */
+.login-ui::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    animation: backgroundFloat 20s ease-in-out infinite;
+    z-index: -1;
+}
+
+@keyframes backgroundFloat {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(1deg); }
+}
+
+/* Login Dialog Container */
+.login-dialog {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-radius: 24px !important;
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.2) !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 480px !important;
+    overflow: hidden !important;
+    backdrop-filter: blur(20px) !important;
+    border: none !important;
+    position: relative !important;
+    animation: loginDialogAppear 0.6s ease-out !important;
+}
+
+@keyframes loginDialogAppear {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Custom TutorPro360 Header */
+.login-dialog::before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 140px;
+    background: var(--tutorpro-gradient);
+    position: relative;
+    background-image: 
+        linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.1) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.1) 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
+/* TutorPro360 Logo and Title */
+.login-dialog::after {
+    content: '';
+    position: absolute;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 80px;
+    background: url('images/tutorpro360-logo.png') center/contain no-repeat;
+    background-color: var(--tutorpro-secondary);
+    border-radius: 50%;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+}
+
+/* Custom title overlay */
+.login-dialog .login-dialog-middle::before {
+    content: 'TutorPro360';
+    display: block;
+    text-align: center;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--tutorpro-primary);
+    margin: 20px 0 5px 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.login-dialog .login-dialog-middle::after {
+    content: 'Educational Remote Access Platform';
+    display: block;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 400;
+    color: #666;
+    margin-bottom: 30px;
+    opacity: 0.8;
+}
+
+/* Form Container */
+.login-dialog .login-dialog-middle {
+    padding: 50px 40px 40px 40px !important;
+    position: relative;
+    z-index: 5;
+}
+
+/* Hide original logo and title */
+.login-dialog .logo,
+.login-dialog .login-logo,
+.login-dialog h1,
+.login-dialog .title {
+    display: none !important;
+}
+
+/* Form Field Styling */
+.login-dialog input[type="text"],
+.login-dialog input[type="password"] {
+    width: 100% !important;
+    padding: 18px 20px !important;
+    border: 2px solid #e1e5e9 !important;
+    border-radius: 12px !important;
+    font-size: 16px !important;
+    font-weight: 400 !important;
+    background: #f8f9fa !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    margin-bottom: 20px !important;
+    box-sizing: border-box !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+.login-dialog input[type="text"]:focus,
+.login-dialog input[type="password"]:focus {
+    outline: none !important;
+    border-color: var(--tutorpro-primary) !important;
+    background: var(--tutorpro-light) !important;
+    box-shadow: 
+        0 0 0 4px var(--tutorpro-shadow),
+        0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Placeholder styling */
+.login-dialog input[type="text"]::placeholder,
+.login-dialog input[type="password"]::placeholder {
+    color: #999 !important;
+    font-weight: 400 !important;
+}
+
+/* Submit Button */
+.login-dialog input[type="submit"],
+.login-dialog button[type="submit"] {
+    width: 100% !important;
+    padding: 18px 20px !important;
+    background: var(--tutorpro-gradient) !important;
+    color: var(--tutorpro-light) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    font-family: 'Inter', sans-serif !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.login-dialog input[type="submit"]:hover,
+.login-dialog button[type="submit"]:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 
+        0 8px 25px var(--tutorpro-shadow),
+        0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.login-dialog input[type="submit"]:active,
+.login-dialog button[type="submit"]:active {
+    transform: translateY(0) !important;
+}
+
+/* Button shine effect */
+.login-dialog input[type="submit"]::before,
+.login-dialog button[type="submit"]::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.login-dialog input[type="submit"]:hover::before,
+.login-dialog button[type="submit"]:hover::before {
+    left: 100%;
+}
+
+/* Error Messages */
+.login-error,
+.error {
+    background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%) !important;
+    color: white !important;
+    padding: 15px 20px !important;
+    border-radius: 12px !important;
+    margin-bottom: 20px !important;
+    text-align: center !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3) !important;
+}
+
+/* Footer/Additional Info */
+.login-dialog .login-dialog-bottom {
+    background: #f8f9fa !important;
+    padding: 20px 40px !important;
+    text-align: center !important;
+    border-top: 1px solid #e9ecef !important;
+}
+
+.login-dialog .login-dialog-bottom::before {
+    content: '🎓 Secure • Reliable • Educational';
+    display: block;
+    color: #666;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.login-dialog .login-dialog-bottom::after {
+    content: '© 2025 TutorPro360 Educational Platform';
+    display: block;
+    color: #999;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .login-ui {
+        padding: 10px !important;
+    }
+    
+    .login-dialog {
+        margin: 10px !important;
+        max-width: none !important;
+        border-radius: 20px !important;
+    }
+    
+    .login-dialog::after {
+        width: 60px;
+        height: 60px;
+        top: 25px;
+    }
+    
+    .login-dialog .login-dialog-middle {
+        padding: 40px 25px 30px 25px !important;
+    }
+    
+    .login-dialog .login-dialog-middle::before {
+        font-size: 28px !important;
+    }
+    
+    .login-dialog .login-dialog-middle::after {
+        font-size: 14px !important;
+    }
+    
+    .login-dialog .login-dialog-bottom {
+        padding: 15px 25px !important;
+    }
+}
+
+/* Loading Animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.login-dialog input[type="submit"]:disabled::after,
+.login-dialog button[type="submit"]:disabled::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Accessibility Improvements */
+.login-dialog input[type="text"]:focus,
+.login-dialog input[type="password"]:focus,
+.login-dialog input[type="submit"]:focus,
+.login-dialog button[type="submit"]:focus {
+    outline: 2px solid var(--tutorpro-primary) !important;
+    outline-offset: 2px !important;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .login-dialog {
+        background: white !important;
+        border: 2px solid var(--tutorpro-primary) !important;
+    }
+    
+    .login-dialog input[type="text"],
+    .login-dialog input[type="password"] {
+        border-width: 3px !important;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .login-dialog,
+    .login-dialog input[type="submit"],
+    .login-dialog button[type="submit"],
+    .login-ui::before {
+        animation: none !important;
+        transition: none !important;
+    }
+}

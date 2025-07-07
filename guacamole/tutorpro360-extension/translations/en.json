@@ -1,0 +1,75 @@
+{
+    "NAME": "TutorPro360",
+    "VERSION": "1.0.0",
+    
+    "LOGIN": {
+        "TITLE": "TutorPro360 - Educational Remote Access",
+        "SUBTITLE": "Secure Educational Platform",
+        "WELCOME": "Welcome to TutorPro360",
+        "DESCRIPTION": "Educational Remote Access Platform",
+        "USERNAME": "Username",
+        "PASSWORD": "Password",
+        "LOGIN_BUTTON": "Sign In to TutorPro360",
+        "LOGGING_IN": "Signing In...",
+        "INVALID_LOGIN": "Invalid username or password. Please try again.",
+        "LOGIN_ERROR": "Login failed. Please check your credentials and try again.",
+        "SESSION_EXPIRED": "Your session has expired. Please sign in again.",
+        "FOOTER_TEXT": "Secure • Reliable • Educational",
+        "COPYRIGHT": "© 2025 TutorPro360 Educational Platform. All rights reserved.",
+        "POWERED_BY": "Powered by TutorPro360"
+    },
+    
+    "BRANDING": {
+        "PLATFORM_NAME": "TutorPro360",
+        "TAGLINE": "Educational Remote Access Platform",
+        "COMPANY": "TutorPro360 Educational Solutions",
+        "SUPPORT_EMAIL": "support@tutorpro360.edu",
+        "WEBSITE": "https://tutorpro360.edu"
+    },
+    
+    "ACCESSIBILITY": {
+        "LOGO_ALT": "TutorPro360 Educational Platform Logo",
+        "USERNAME_PLACEHOLDER": "Enter your username",
+        "PASSWORD_PLACEHOLDER": "Enter your password",
+        "LOGIN_BUTTON_ARIA": "Sign in to TutorPro360 platform",
+        "ERROR_ARIA": "Login error message"
+    },
+    
+    "FEATURES": {
+        "STUDENTS": "For Students",
+        "STUDENTS_DESC": "Access virtual labs and educational software",
+        "EDUCATORS": "For Educators", 
+        "EDUCATORS_DESC": "Manage and monitor student access",
+        "SECURE": "Secure",
+        "SECURE_DESC": "Enterprise-grade security and encryption"
+    },
+    
+    "MESSAGES": {
+        "WELCOME_BACK": "Welcome back to TutorPro360",
+        "FIRST_TIME": "First time using TutorPro360?",
+        "CONTACT_ADMIN": "Contact your administrator for access",
+        "TECHNICAL_SUPPORT": "Need technical support?",
+        "BROWSER_COMPATIBILITY": "For best experience, use a modern web browser",
+        "LOADING": "Loading TutorPro360...",
+        "CONNECTING": "Connecting to educational resources...",
+        "AUTHENTICATING": "Authenticating your credentials..."
+    },
+    
+    "ERRORS": {
+        "NETWORK_ERROR": "Network connection error. Please check your internet connection.",
+        "SERVER_ERROR": "Server error. Please try again later or contact support.",
+        "BROWSER_NOT_SUPPORTED": "Your browser is not supported. Please update to a modern browser.",
+        "JAVASCRIPT_REQUIRED": "JavaScript is required for TutorPro360 to function properly.",
+        "COOKIES_REQUIRED": "Cookies must be enabled to use TutorPro360.",
+        "MAINTENANCE": "TutorPro360 is currently under maintenance. Please try again later."
+    },
+    
+    "HELP": {
+        "FORGOT_PASSWORD": "Forgot your password?",
+        "CONTACT_SUPPORT": "Contact Support",
+        "USER_GUIDE": "User Guide",
+        "SYSTEM_REQUIREMENTS": "System Requirements",
+        "PRIVACY_POLICY": "Privacy Policy",
+        "TERMS_OF_SERVICE": "Terms of Service"
+    }
+}

@@ -1,0 +1,256 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tutorpro360-custom
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: tutorpro360
+    app.kubernetes.io/instance: tutorpro360-custom
+    app.kubernetes.io/version: "1.5.4"
+    app.kubernetes.io/component: web-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tutorpro360
+      app.kubernetes.io/instance: tutorpro360-custom
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: tutorpro360
+        app.kubernetes.io/instance: tutorpro360-custom
+        app.kubernetes.io/version: "1.5.4"
+        app.kubernetes.io/component: web-app
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+      volumes:
+      - name: tutorpro360-theme
+        configMap:
+          name: tutorpro360-theme
+      - name: tutorpro360-assets
+        configMap:
+          name: tutorpro360-assets
+      - name: custom-webapp
+        emptyDir: {}
+      initContainers:
+      - name: setup-custom-theme
+        image: guacamole/guacamole:1.5.4
+        command:
+        - sh
+        - -c
+        - |
+          echo "Setting up TutorPro360 custom theme..."
+          
+          # Create theme directory structure
+          mkdir -p /tmp/webapp/themes/tutorpro360/template
+          mkdir -p /tmp/webapp/themes/tutorpro360/webapp/images
+          mkdir -p /tmp/webapp/themes/tutorpro360/webapp/css
+          mkdir -p /tmp/webapp/app/ext/tutorpro360
+          
+          # Copy theme files
+          cp /tmp/theme/login.html /tmp/webapp/themes/tutorpro360/template/
+          cp /tmp/theme/login.css /tmp/webapp/themes/tutorpro360/webapp/css/
+          cp /tmp/theme/theme.json /tmp/webapp/themes/tutorpro360/
+          
+          # Copy assets
+          cp /tmp/assets/logo.svg /tmp/webapp/themes/tutorpro360/webapp/images/
+          cp /tmp/assets/background.jpg /tmp/webapp/themes/tutorpro360/webapp/images/
+          cp /tmp/assets/favicon.ico /tmp/webapp/themes/tutorpro360/webapp/images/
+          cp /tmp/assets/tutorpro360-theme.css /tmp/webapp/app/ext/tutorpro360/
+          
+          # Create custom index.html that loads our theme
+          cat > /tmp/webapp/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>TutorPro360 - Educational Remote Access Platform</title>
+              <meta name="description" content="TutorPro360 Educational Remote Access Platform">
+              <link rel="icon" type="image/x-icon" href="themes/tutorpro360/webapp/images/favicon.ico">
+              <link rel="stylesheet" type="text/css" href="app/ext/tutorpro360/tutorpro360-theme.css">
+              <style>
+                  /* Immediate branding styles */
+                  body {
+                      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+                      background-attachment: fixed !important;
+                      margin: 0 !important;
+                      padding: 0 !important;
+                      min-height: 100vh !important;
+                  }
+                  
+                  .tutorpro360-splash {
+                      position: fixed;
+                      top: 0;
+                      left: 0;
+                      width: 100%;
+                      height: 100%;
+                      background: linear-gradient(135deg, #2143AF 0%, #00BCD4 100%);
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      z-index: 9999;
+                      color: white;
+                      font-size: 24px;
+                      font-weight: bold;
+                      text-align: center;
+                  }
+                  
+                  .splash-content {
+                      animation: fadeInUp 1s ease-out;
+                  }
+                  
+                  @keyframes fadeInUp {
+                      from { opacity: 0; transform: translateY(30px); }
+                      to { opacity: 1; transform: translateY(0); }
+                  }
+              </style>
+          </head>
+          <body>
+              <div class="tutorpro360-splash" id="splash">
+                  <div class="splash-content">
+                      <div style="font-size: 48px; margin-bottom: 20px;">🎓</div>
+                      <div>TutorPro360</div>
+                      <div style="font-size: 16px; margin-top: 10px; opacity: 0.9;">Educational Remote Access Platform</div>
+                      <div style="font-size: 14px; margin-top: 20px; opacity: 0.7;">Loading...</div>
+                  </div>
+              </div>
+              
+              <div id="app-container" style="display: none;"></div>
+              
+              <script>
+                  // TutorPro360 initialization
+                  document.addEventListener('DOMContentLoaded', function() {
+                      // Hide splash after 2 seconds and load main app
+                      setTimeout(function() {
+                          document.getElementById('splash').style.display = 'none';
+                          document.getElementById('app-container').style.display = 'block';
+                          
+                          // Load the main Guacamole application
+                          window.location.reload();
+                      }, 2000);
+                  });
+                  
+                  // Apply TutorPro360 branding immediately
+                  (function() {
+                      // Change title
+                      document.title = 'TutorPro360 - Educational Remote Access Platform';
+                      
+                      // Replace any Guacamole text
+                      function replaceText() {
+                          const walker = document.createTreeWalker(
+                              document.body,
+                              NodeFilter.SHOW_TEXT,
+                              null,
+                              false
+                          );
+                          
+                          let node;
+                          while (node = walker.nextNode()) {
+                              if (node.textContent.includes('Guacamole')) {
+                                  node.textContent = node.textContent.replace(/Apache Guacamole/gi, 'TutorPro360');
+                                  node.textContent = node.textContent.replace(/Guacamole/gi, 'TutorPro360');
+                              }
+                          }
+                      }
+                      
+                      // Apply branding periodically
+                      setInterval(replaceText, 1000);
+                  })();
+              </script>
+          </body>
+          </html>
+          EOF
+          
+          echo "TutorPro360 custom theme setup complete!"
+          ls -la /tmp/webapp/themes/tutorpro360/
+          ls -la /tmp/webapp/app/ext/tutorpro360/
+        volumeMounts:
+        - name: tutorpro360-theme
+          mountPath: /tmp/theme
+        - name: tutorpro360-assets
+          mountPath: /tmp/assets
+        - name: custom-webapp
+          mountPath: /tmp/webapp
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+      - name: wait-for-services
+        image: busybox:1.35
+        command:
+        - sh
+        - -c
+        - |
+          until nc -z guacd-service 4822; do sleep 5; done
+          until nc -z postgres-service 5432; do sleep 5; done
+          echo "Services ready!"
+      containers:
+      - name: tutorpro360
+        image: guacamole/guacamole:1.5.4
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: POSTGRESQL_HOSTNAME
+          value: "postgres-service"
+        - name: POSTGRESQL_PORT
+          value: "5432"
+        - name: POSTGRESQL_DATABASE
+          value: "guacamole_db"
+        - name: POSTGRESQL_USER
+          value: "postgres"
+        - name: POSTGRESQL_PASSWORD
+          value: "postgresadmin123"
+        - name: GUACD_HOSTNAME
+          value: "guacd-service"
+        - name: GUACD_PORT
+          value: "4822"
+        - name: WEBAPP_CONTEXT
+          value: "ROOT"
+        - name: LOGBACK_LEVEL
+          value: "INFO"
+        - name: GUACAMOLE_HOME
+          value: "/etc/guacamole"
+        - name: JAVA_OPTS
+          value: "-Xmx1024m -Xms512m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Djava.security.egd=file:/dev/./urandom -Dguacamole.application.title=TutorPro360 -Dguacamole.brand.name=TutorPro360 -Dguacamole.theme=tutorpro360"
+        volumeMounts:
+        - name: custom-webapp
+          mountPath: /usr/local/tomcat/webapps/ROOT
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          capabilities:
+            drop:
+            - ALL
+      restartPolicy: Always

@@ -1,0 +1,115 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: guacamole-db-init-fixed
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: guacamole-db-init
+    app.kubernetes.io/instance: guacamole-db-init
+    app.kubernetes.io/version: "1.5.4"
+    app.kubernetes.io/component: database-init
+    app.kubernetes.io/part-of: guacamole-stack
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: guacamole-db-init
+        app.kubernetes.io/instance: guacamole-db-init
+        app.kubernetes.io/component: database-init
+    spec:
+      restartPolicy: Never
+      initContainers:
+      - name: wait-for-postgres
+        image: postgres:15-alpine
+        command:
+        - sh
+        - -c
+        - |
+          until pg_isready -h postgres-service -p 5432 -U postgres; do
+            echo "Waiting for PostgreSQL to be ready..."
+            sleep 5
+          done
+          echo "PostgreSQL is ready!"
+        env:
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-password
+      - name: generate-schema
+        image: guacamole/guacamole:1.5.4
+        command:
+        - sh
+        - -c
+        - |
+          echo "Generating Guacamole database schema..."
+          /opt/guacamole/bin/initdb.sh --postgresql > /shared/initdb.sql
+          echo "Schema generated successfully!"
+        volumeMounts:
+        - name: shared-data
+          mountPath: /shared
+      containers:
+      - name: db-init
+        image: postgres:15-alpine
+        command:
+        - sh
+        - -c
+        - |
+          # Check if tables already exist
+          TABLES_EXIST=$(psql -h postgres-service -U postgres -d guacamole_db -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'guacamole_user';" 2>/dev/null || echo "0")
+          
+          if [ "$TABLES_EXIST" -eq "0" ]; then
+            echo "Initializing Guacamole database schema..."
+            psql -h postgres-service -U postgres -d guacamole_db -f /shared/initdb.sql
+            
+            # Create default admin user (password: guacadmin)
+            echo "Creating default admin user..."
+            psql -h postgres-service -U postgres -d guacamole_db << EOF
+          INSERT INTO guacamole_entity (name, type) VALUES ('guacadmin', 'USER');
+          INSERT INTO guacamole_user (entity_id, password_hash, password_salt, password_date)
+          SELECT entity_id, 
+                 decode('CA458A7D494E3BE824F5E1E175A1556C0F8EEF2C2D7DF3633BEC4A29C4411960', 'hex'), 
+                 decode('FE24ADC5E11E2B25288D1704ABE67A79E342ECC26064CE69C5B3177795A82264', 'hex'), 
+                 NOW()
+          FROM guacamole_entity WHERE name = 'guacadmin' AND type = 'USER';
+          
+          INSERT INTO guacamole_user_permission (entity_id, affected_user_id, permission)
+          SELECT entity_id, entity_id, 'ADMINISTER'
+          FROM guacamole_entity WHERE name = 'guacadmin' AND type = 'USER';
+          EOF
+            echo "Default admin user created successfully!"
+            echo "Login credentials: guacadmin / guacadmin"
+            echo "Database initialization completed!"
+          else
+            echo "Database already initialized, skipping..."
+          fi
+        env:
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-password
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-user
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-db
+        volumeMounts:
+        - name: shared-data
+          mountPath: /shared
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: shared-data
+        emptyDir: {}

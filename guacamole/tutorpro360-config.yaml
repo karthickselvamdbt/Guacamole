@@ -1,0 +1,78 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tutorpro360-config
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: guacamole
+    app.kubernetes.io/component: config
+data:
+  guacamole.properties: |
+    # TutorPro360 Configuration
+    # PostgreSQL configuration - credentials loaded via environment variables
+    postgresql-hostname: postgres-service
+    postgresql-port: 5432
+    
+    # Guacd configuration
+    guacd-hostname: guacd-service
+    guacd-port: 4822
+    
+    # Additional security settings
+    postgresql-auto-create-accounts: false
+    postgresql-default-max-connections: 0
+    postgresql-default-max-group-connections: 0
+    
+    # Session timeout (30 minutes)
+    api-session-timeout: 30
+    
+    # Enable extension support
+    extension-priority: postgresql
+    
+    # Security enhancements
+    skip-if-unavailable: postgresql
+    
+    # Custom branding settings
+    enable-environment-properties: true
+    
+    # Custom web app settings
+    webapp-context: ROOT
+    
+    # Custom extension path
+    lib-directory: /etc/guacamole/lib
+    extensions-directory: /etc/guacamole/extensions
+    
+    # Custom resource paths
+    web-resource-path: /etc/guacamole/web
+    
+    # Logging configuration
+    logback-level: INFO
+    
+    # Custom authentication settings
+    postgresql-user-required: true
+    postgresql-user-password-min-length: 8
+    
+    # Session management
+    postgresql-max-connections: 100
+    postgresql-max-connections-per-user: 10
+    
+    # Custom UI settings (if supported by extensions)
+    custom-css-path: /etc/guacamole/web/custom.css
+    custom-js-path: /etc/guacamole/web/custom.js
+    
+    # Application title
+    application-title: TutorPro360
+    
+    # Custom footer text
+    footer-text: TutorPro360 - Educational Remote Access Platform
+    
+    # Disable Guacamole branding
+    hide-guacamole-branding: true
+    
+    # Custom logo path
+    logo-path: /etc/guacamole/web/logo.svg
+    
+    # Theme settings
+    theme: tutorpro360
+    primary-color: #2143AF
+    secondary-color: #00BCD4
+    accent-color: #FF6B35

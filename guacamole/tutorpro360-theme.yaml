@@ -1,0 +1,374 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tutorpro360-theme
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: tutorpro360
+    app.kubernetes.io/component: theme
+data:
+  # Custom login.html template
+  login.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>TutorPro360 - Educational Remote Access</title>
+        <meta name="description" content="TutorPro360 Educational Remote Access Platform">
+        <link rel="icon" type="image/png" href="images/tutorpro360-favicon.png">
+        <link rel="stylesheet" type="text/css" href="app/ext/tutorpro360/login.css">
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background-attachment: fixed;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .login-container {
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 20px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+                padding: 0;
+                width: 100%;
+                max-width: 450px;
+                overflow: hidden;
+                backdrop-filter: blur(10px);
+            }
+            
+            .login-header {
+                background: linear-gradient(135deg, #2143AF 0%, #00BCD4 100%);
+                padding: 40px 30px;
+                text-align: center;
+                color: white;
+                position: relative;
+            }
+            
+            .login-header::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+                opacity: 0.3;
+            }
+            
+            .tutorpro360-logo {
+                position: relative;
+                z-index: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 15px;
+                margin-bottom: 10px;
+            }
+            
+            .logo-icon {
+                width: 60px;
+                height: 60px;
+                background: #00BCD4;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                color: white;
+                font-size: 18px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            }
+            
+            .logo-text h1 {
+                margin: 0;
+                font-size: 32px;
+                font-weight: 700;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            }
+            
+            .logo-text p {
+                margin: 5px 0 0 0;
+                font-size: 14px;
+                opacity: 0.9;
+                font-weight: 300;
+            }
+            
+            .login-form {
+                padding: 40px 30px;
+            }
+            
+            .form-group {
+                margin-bottom: 25px;
+            }
+            
+            .form-group label {
+                display: block;
+                margin-bottom: 8px;
+                color: #333;
+                font-weight: 500;
+                font-size: 14px;
+            }
+            
+            .form-group input {
+                width: 100%;
+                padding: 15px;
+                border: 2px solid #e1e5e9;
+                border-radius: 10px;
+                font-size: 16px;
+                transition: all 0.3s ease;
+                box-sizing: border-box;
+                background: #f8f9fa;
+            }
+            
+            .form-group input:focus {
+                outline: none;
+                border-color: #2143AF;
+                background: white;
+                box-shadow: 0 0 0 3px rgba(33, 67, 175, 0.1);
+            }
+            
+            .login-button {
+                width: 100%;
+                padding: 15px;
+                background: linear-gradient(135deg, #2143AF 0%, #00BCD4 100%);
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+            
+            .login-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(33, 67, 175, 0.3);
+            }
+            
+            .login-button:active {
+                transform: translateY(0);
+            }
+            
+            .login-footer {
+                text-align: center;
+                padding: 20px 30px;
+                background: #f8f9fa;
+                color: #666;
+                font-size: 12px;
+            }
+            
+            .features {
+                display: flex;
+                justify-content: space-around;
+                margin-top: 20px;
+                padding: 0 10px;
+            }
+            
+            .feature {
+                text-align: center;
+                flex: 1;
+            }
+            
+            .feature-icon {
+                font-size: 24px;
+                margin-bottom: 5px;
+            }
+            
+            .feature-text {
+                font-size: 11px;
+                color: #888;
+            }
+            
+            .error-message {
+                background: #ff4757;
+                color: white;
+                padding: 10px;
+                border-radius: 5px;
+                margin-bottom: 20px;
+                text-align: center;
+                font-size: 14px;
+            }
+            
+            @media (max-width: 480px) {
+                .login-container {
+                    margin: 20px;
+                    max-width: none;
+                }
+                
+                .login-header {
+                    padding: 30px 20px;
+                }
+                
+                .logo-text h1 {
+                    font-size: 28px;
+                }
+                
+                .login-form {
+                    padding: 30px 20px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="login-container">
+            <div class="login-header">
+                <div class="tutorpro360-logo">
+                    <div class="logo-icon">360</div>
+                    <div class="logo-text">
+                        <h1>TutorPro360</h1>
+                        <p>Educational Remote Access Platform</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="login-form">
+                <form id="login-form" method="post">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" required autocomplete="username" placeholder="Enter your username">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="Enter your password">
+                    </div>
+                    
+                    <button type="submit" class="login-button">
+                        Sign In to TutorPro360
+                    </button>
+                </form>
+                
+                <div class="features">
+                    <div class="feature">
+                        <div class="feature-icon">🎓</div>
+                        <div class="feature-text">Students</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">👨‍🏫</div>
+                        <div class="feature-text">Educators</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🔒</div>
+                        <div class="feature-text">Secure</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="login-footer">
+                <p>&copy; 2025 TutorPro360 Educational Platform. All rights reserved.</p>
+                <p>Secure • Reliable • Educational</p>
+            </div>
+        </div>
+        
+        <script>
+            // TutorPro360 login enhancements
+            document.addEventListener('DOMContentLoaded', function() {
+                // Focus on username field
+                document.getElementById('username').focus();
+                
+                // Add loading state to button
+                const form = document.getElementById('login-form');
+                const button = document.querySelector('.login-button');
+                
+                form.addEventListener('submit', function() {
+                    button.innerHTML = 'Signing In...';
+                    button.disabled = true;
+                });
+                
+                // Add enter key support
+                document.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        form.submit();
+                    }
+                });
+            });
+        </script>
+    </body>
+    </html>
+
+  # Custom CSS for additional styling
+  login.css: |
+    /* TutorPro360 Additional Login Styles */
+    
+    /* Animation for logo */
+    @keyframes logoFloat {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-5px); }
+    }
+    
+    .logo-icon {
+        animation: logoFloat 3s ease-in-out infinite;
+    }
+    
+    /* Gradient animation for background */
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    
+    body {
+        background: linear-gradient(-45deg, #667eea, #764ba2, #2143AF, #00BCD4);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+    }
+    
+    /* Input focus animations */
+    .form-group input {
+        position: relative;
+    }
+    
+    .form-group input:focus {
+        animation: inputFocus 0.3s ease;
+    }
+    
+    @keyframes inputFocus {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+        100% { transform: scale(1); }
+    }
+    
+    /* Button hover effects */
+    .login-button {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .login-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .login-button:hover::before {
+        left: 100%;
+    }
+
+  # Theme configuration
+  theme.json: |
+    {
+      "name": "TutorPro360 Educational Theme",
+      "version": "1.0.0",
+      "description": "Custom educational theme for TutorPro360 platform",
+      "author": "TutorPro360 Team",
+      "primaryColor": "#2143AF",
+      "secondaryColor": "#00BCD4",
+      "accentColor": "#FF6B35",
+      "backgroundColor": "#f5f7fa",
+      "textColor": "#333333",
+      "loginTemplate": "login.html",
+      "customCSS": "login.css"
+    }

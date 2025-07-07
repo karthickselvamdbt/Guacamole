@@ -1,0 +1,423 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tutorpro360-branding
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: guacamole
+    app.kubernetes.io/component: branding
+data:
+  # Custom CSS for TutorPro360 branding
+  custom.css: |
+    /* TutorPro360 Custom Branding - Complete UI Override */
+
+    /* Hide original Guacamole branding */
+    .home-logo, .login-logo, .header-logo, .brand, .logo {
+        display: none !important;
+    }
+
+    /* Custom TutorPro360 Header */
+    .header::before {
+        content: "";
+        display: block;
+        width: 100%;
+        height: 80px;
+        background: linear-gradient(135deg, #2143AF 0%, #00BCD4 100%);
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .header::after {
+        content: "TutorPro360";
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        font-size: 28px;
+        font-weight: bold;
+        color: white;
+        font-family: 'Arial', sans-serif;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        z-index: 1000;
+    }
+
+    /* Main page title replacement */
+    h1, .page-title, .main-title {
+        position: relative;
+    }
+
+    h1::before, .page-title::before, .main-title::before {
+        content: "TutorPro360 Educational Platform";
+        display: block;
+        font-size: 32px;
+        font-weight: bold;
+        color: #2143AF;
+        text-align: center;
+        margin: 20px 0;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+
+    /* Home page branding */
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 100px;
+        background: linear-gradient(135deg, #2143AF 0%, #00BCD4 100%);
+        z-index: 999;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    body::after {
+        content: "TutorPro360 - Educational Remote Access";
+        position: fixed;
+        top: 25px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 24px;
+        font-weight: bold;
+        color: white;
+        z-index: 1000;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    /* Adjust body padding to account for fixed header */
+    body {
+        padding-top: 120px !important;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+    }
+    
+    /* Header branding */
+    .header .logo {
+        background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMjAwIDYwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjMjE0M0FGIiByeD0iOCIvPgo8dGV4dCB4PSIxMCIgeT0iMjAiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtd2VpZ2h0PSJib2xkIj5UdXRvclBybzM2MDwvdGV4dD4KPHRleHQgeD0iMTAiIHk9IjM4IiBmaWxsPSIjRkZGRkZGIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTAiPkVkdWNhdGlvbmFsIFJlbW90ZSBBY2Nlc3M8L3RleHQ+CjxjaXJjbGUgY3g9IjE3MCIgY3k9IjMwIiByPSIxNSIgZmlsbD0iIzAwQkNENCIvPgo8dGV4dCB4PSIxNjUiIHk9IjM1IiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iYm9sZCI+MzYwPC90ZXh0Pgo8L3N2Zz4K') !important;
+    }
+    
+    /* Login page branding */
+    .login-ui .logo {
+        background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMjAwIDYwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjMjE0M0FGIiByeD0iOCIvPgo8dGV4dCB4PSIxMCIgeT0iMjAiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtd2VpZ2h0PSJib2xkIj5UdXRvclBybzM2MDwvdGV4dD4KPHRleHQgeD0iMTAiIHk9IjM4IiBmaWxsPSIjRkZGRkZGIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTAiPkVkdWNhdGlvbmFsIFJlbW90ZSBBY2Nlc3M8L3RleHQ+CjxjaXJjbGUgY3g9IjE3MCIgY3k9IjMwIiByPSIxNSIgZmlsbD0iIzAwQkNENCIvPgo8dGV4dCB4PSIxNjUiIHk9IjM1IiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iYm9sZCI+MzYwPC90ZXh0Pgo8L3N2Zz4K') !important;
+        margin-bottom: 20px;
+    }
+    
+    /* Custom color scheme */
+    :root {
+        --tutorpro-primary: #2143AF;
+        --tutorpro-secondary: #00BCD4;
+        --tutorpro-accent: #FF6B35;
+        --tutorpro-text: #333333;
+    }
+    
+    /* Header styling */
+    .header {
+        background-color: var(--tutorpro-primary) !important;
+        border-bottom: 3px solid var(--tutorpro-secondary);
+    }
+    
+    /* Button styling */
+    .button, .btn {
+        background-color: var(--tutorpro-primary) !important;
+        border-color: var(--tutorpro-primary) !important;
+    }
+    
+    .button:hover, .btn:hover {
+        background-color: var(--tutorpro-secondary) !important;
+        border-color: var(--tutorpro-secondary) !important;
+    }
+    
+    /* Link styling */
+    a {
+        color: var(--tutorpro-primary) !important;
+    }
+    
+    a:hover {
+        color: var(--tutorpro-secondary) !important;
+    }
+    
+    /* Login form styling */
+    .login-ui {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+    
+    .login-dialog {
+        border: 2px solid var(--tutorpro-primary);
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(33, 67, 175, 0.3);
+    }
+    
+    /* Custom footer */
+    .footer::after {
+        content: "Powered by TutorPro360 - Educational Remote Access Platform";
+        display: block;
+        text-align: center;
+        color: var(--tutorpro-text);
+        font-size: 12px;
+        margin-top: 10px;
+    }
+    
+    /* Hide original Guacamole branding */
+    .footer .copyright {
+        display: none !important;
+    }
+    
+    /* Page title customization */
+    title {
+        content: "TutorPro360 - Remote Access";
+    }
+
+  # Custom JavaScript for TutorPro360 branding injection
+  custom.js: |
+    // TutorPro360 Advanced Branding JavaScript
+    (function() {
+        'use strict';
+
+        // Change page title immediately
+        document.title = 'TutorPro360 - Educational Remote Access Platform';
+
+        // Add custom meta tags
+        function addMetaTags() {
+            var metaDescription = document.createElement('meta');
+            metaDescription.name = 'description';
+            metaDescription.content = 'TutorPro360 - Secure Educational Remote Access Platform for Schools and Universities';
+            document.head.appendChild(metaDescription);
+
+            var metaKeywords = document.createElement('meta');
+            metaKeywords.name = 'keywords';
+            metaKeywords.content = 'TutorPro360, education, remote access, virtual desktop, learning platform';
+            document.head.appendChild(metaKeywords);
+        }
+
+        // Create TutorPro360 header
+        function createTutorProHeader() {
+            // Remove existing headers
+            var existingHeaders = document.querySelectorAll('.header, .navbar, .top-bar');
+            existingHeaders.forEach(function(header) {
+                header.style.display = 'none';
+            });
+
+            // Create new TutorPro360 header
+            var header = document.createElement('div');
+            header.id = 'tutorpro360-header';
+            header.innerHTML = `
+                <div style="
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 80px;
+                    background: linear-gradient(135deg, #2143AF 0%, #00BCD4 100%);
+                    z-index: 9999;
+                    display: flex;
+                    align-items: center;
+                    padding: 0 20px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                ">
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        gap: 15px;
+                    ">
+                        <div style="
+                            width: 50px;
+                            height: 50px;
+                            background: #00BCD4;
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-weight: bold;
+                            color: white;
+                            font-size: 14px;
+                        ">360</div>
+                        <div>
+                            <h1 style="
+                                margin: 0;
+                                color: white;
+                                font-size: 28px;
+                                font-weight: bold;
+                                text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+                            ">TutorPro360</h1>
+                            <p style="
+                                margin: 0;
+                                color: rgba(255,255,255,0.9);
+                                font-size: 14px;
+                            ">Educational Remote Access Platform</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertBefore(header, document.body.firstChild);
+
+            // Adjust body padding
+            document.body.style.paddingTop = '100px';
+        }
+
+        // Replace text content throughout the page
+        function replaceTextContent() {
+            function replaceInNode(node) {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    var text = node.textContent;
+                    text = text.replace(/Apache Guacamole/gi, 'TutorPro360');
+                    text = text.replace(/Guacamole/gi, 'TutorPro360');
+                    text = text.replace(/Remote Desktop Gateway/gi, 'Educational Remote Access');
+                    text = text.replace(/clientless remote desktop/gi, 'educational remote access');
+                    node.textContent = text;
+                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                    // Replace in attributes too
+                    if (node.title) {
+                        node.title = node.title.replace(/Guacamole/gi, 'TutorPro360');
+                    }
+                    if (node.alt) {
+                        node.alt = node.alt.replace(/Guacamole/gi, 'TutorPro360');
+                    }
+
+                    for (var i = 0; i < node.childNodes.length; i++) {
+                        replaceInNode(node.childNodes[i]);
+                    }
+                }
+            }
+
+            replaceInNode(document.body);
+        }
+
+        // Add welcome message to home page
+        function addWelcomeMessage() {
+            var welcomeDiv = document.createElement('div');
+            welcomeDiv.id = 'tutorpro360-welcome';
+            welcomeDiv.innerHTML = `
+                <div style="
+                    background: white;
+                    margin: 20px auto;
+                    padding: 30px;
+                    border-radius: 10px;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                    max-width: 800px;
+                    text-align: center;
+                    border-top: 4px solid #2143AF;
+                ">
+                    <h2 style="
+                        color: #2143AF;
+                        margin-bottom: 15px;
+                        font-size: 24px;
+                    ">Welcome to TutorPro360</h2>
+                    <p style="
+                        color: #666;
+                        font-size: 16px;
+                        line-height: 1.6;
+                        margin-bottom: 20px;
+                    ">Your comprehensive educational remote access platform. Connect securely to educational resources, virtual labs, and remote desktops from anywhere.</p>
+                    <div style="
+                        display: flex;
+                        justify-content: center;
+                        gap: 20px;
+                        flex-wrap: wrap;
+                    ">
+                        <div style="
+                            background: #f8f9fa;
+                            padding: 15px;
+                            border-radius: 8px;
+                            border-left: 4px solid #00BCD4;
+                        ">
+                            <strong style="color: #2143AF;">🎓 For Students</strong><br>
+                            <span style="color: #666; font-size: 14px;">Access virtual labs and educational software</span>
+                        </div>
+                        <div style="
+                            background: #f8f9fa;
+                            padding: 15px;
+                            border-radius: 8px;
+                            border-left: 4px solid #00BCD4;
+                        ">
+                            <strong style="color: #2143AF;">👨‍🏫 For Educators</strong><br>
+                            <span style="color: #666; font-size: 14px;">Manage and monitor student access</span>
+                        </div>
+                        <div style="
+                            background: #f8f9fa;
+                            padding: 15px;
+                            border-radius: 8px;
+                            border-left: 4px solid #00BCD4;
+                        ">
+                            <strong style="color: #2143AF;">🔒 Secure</strong><br>
+                            <span style="color: #666; font-size: 14px;">Enterprise-grade security and encryption</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Insert after any existing content
+            var mainContent = document.querySelector('.main-content, .content, main, #content') || document.body;
+            mainContent.appendChild(welcomeDiv);
+        }
+
+        // Initialize branding
+        function initializeTutorPro360() {
+            addMetaTags();
+            createTutorProHeader();
+            replaceTextContent();
+            addWelcomeMessage();
+        }
+
+        // Run when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeTutorPro360);
+        } else {
+            initializeTutorPro360();
+        }
+
+        // Monitor for dynamic content changes
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        // Replace text in new nodes
+                        function replaceInNewNode(newNode) {
+                            if (newNode.nodeType === Node.TEXT_NODE) {
+                                var text = newNode.textContent;
+                                text = text.replace(/Apache Guacamole/gi, 'TutorPro360');
+                                text = text.replace(/Guacamole/gi, 'TutorPro360');
+                                newNode.textContent = text;
+                            } else if (newNode.nodeType === Node.ELEMENT_NODE) {
+                                for (var i = 0; i < newNode.childNodes.length; i++) {
+                                    replaceInNewNode(newNode.childNodes[i]);
+                                }
+                            }
+                        }
+                        replaceInNewNode(node);
+                    }
+                });
+            });
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+
+        // Periodically refresh branding (in case of dynamic content)
+        setInterval(function() {
+            if (!document.getElementById('tutorpro360-header')) {
+                createTutorProHeader();
+            }
+            replaceTextContent();
+        }, 5000);
+
+    })();
+
+  # Custom HTML template for login page
+  login-template.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>TutorPro360 - Educational Remote Access</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="TutorPro360 - Secure Educational Remote Access Platform">
+        <link rel="stylesheet" type="text/css" href="app/ext/tutorpro360/custom.css">
+    </head>
+    <body class="login-ui">
+        <div class="login-dialog">
+            <div class="logo"></div>
+            <h1>Welcome to TutorPro360</h1>
+            <p>Educational Remote Access Platform</p>
+            <!-- Login form will be injected here -->
+        </div>
+        <script src="app/ext/tutorpro360/custom.js"></script>
+    </body>
+    </html>

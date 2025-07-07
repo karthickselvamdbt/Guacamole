@@ -1,0 +1,74 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: guacamole-reset-user
+  namespace: guacamole
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: reset-user
+        image: postgres:13-alpine
+        env:
+        - name: PGPASSWORD
+          value: "postgresadmin123"
+        command:
+        - /bin/sh
+        - -c
+        - |
+          echo "Resetting Guacamole admin user..."
+          
+          # Wait for PostgreSQL to be ready
+          until pg_isready -h postgres-service -p 5432 -U postgres; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+          
+          # Create the default admin user as per Guacamole documentation
+          psql -h postgres-service -U postgres -d guacamole_db <<EOF
+          
+          -- Delete existing admin/guacadmin users if they exist
+          DELETE FROM guacamole_user_permission WHERE entity_id IN (
+              SELECT entity_id FROM guacamole_entity WHERE name IN ('admin', 'guacadmin')
+          );
+          DELETE FROM guacamole_user WHERE entity_id IN (
+              SELECT entity_id FROM guacamole_entity WHERE name IN ('admin', 'guacadmin')
+          );
+          DELETE FROM guacamole_entity WHERE name IN ('admin', 'guacadmin');
+          
+          -- Create guacadmin entity
+          INSERT INTO guacamole_entity (name, type) VALUES ('guacadmin', 'USER');
+          
+          -- Create guacadmin user with default password hash
+          -- This is the SHA-256 hash of 'guacadmin' with salt
+          INSERT INTO guacamole_user (
+              entity_id, 
+              password_hash, 
+              password_salt, 
+              password_date
+          ) VALUES (
+              (SELECT entity_id FROM guacamole_entity WHERE name = 'guacadmin'),
+              decode('32ca92c86dc9175c94b4edd1237495ac7c41de22e8ecbf4b0eb6c8061a01b89e', 'hex'),
+              decode('fe24adc5e11e2b25288d9c2a2879', 'hex'),
+              NOW()
+          );
+          
+          -- Grant admin permissions
+          INSERT INTO guacamole_user_permission (entity_id, affected_user_id, permission)
+          SELECT entity_id, entity_id, 'UPDATE'
+          FROM guacamole_entity WHERE name = 'guacadmin';
+          
+          INSERT INTO guacamole_user_permission (entity_id, affected_user_id, permission)
+          SELECT entity_id, entity_id, 'ADMINISTER'
+          FROM guacamole_entity WHERE name = 'guacadmin';
+          
+          -- Verify the user was created
+          SELECT e.name, encode(u.password_hash, 'hex') as hash, encode(u.password_salt, 'hex') as salt
+          FROM guacamole_entity e 
+          JOIN guacamole_user u ON e.entity_id = u.entity_id 
+          WHERE e.name = 'guacadmin';
+          
+          EOF
+          
+          echo "Admin user reset complete!"

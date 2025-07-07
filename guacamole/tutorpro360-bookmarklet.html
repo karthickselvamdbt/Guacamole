@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TutorPro360 Branding Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #2143AF 0%, #00BCD4 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 36px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            border-top: 4px solid #2143AF;
+        }
+        .bookmarklet {
+            background: #f8f9fa;
+            border: 2px dashed #2143AF;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .bookmarklet a {
+            display: inline-block;
+            background: #2143AF;
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 16px;
+            margin: 10px;
+            transition: background 0.3s;
+        }
+        .bookmarklet a:hover {
+            background: #00BCD4;
+        }
+        .instructions {
+            background: #e8f4f8;
+            border-left: 4px solid #00BCD4;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .code {
+            background: #f4f4f4;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .step {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            border-left: 3px solid #2143AF;
+        }
+        .icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎓 TutorPro360 Branding Tool</h1>
+        <p>Transform your Guacamole interface into TutorPro360</p>
+    </div>
+
+    <div class="card">
+        <h2>📚 Quick Start - Bookmarklet Method</h2>
+        <p>The easiest way to apply TutorPro360 branding is to use our bookmarklet. Just drag the button below to your bookmarks bar:</p>
+        
+        <div class="bookmarklet">
+            <p><strong>Drag this button to your bookmarks bar:</strong></p>
+            <a href="javascript:(function(){var s=document.createElement('script');s.src='data:text/javascript;charset=utf-8,(function(){%27use strict%27;console.log(%27🎓 Applying TutorPro360 branding...%27);document.title=%27TutorPro360 - Educational Remote Access Platform%27;const tutorProCSS=%60%23tutorpro360-header{position:fixed!important;top:0!important;left:0!important;right:0!important;height:80px!important;background:linear-gradient(135deg,%232143AF 0%25,%2300BCD4 100%25)!important;z-index:9999!important;display:flex!important;align-items:center!important;padding:0 20px!important;box-shadow:0 2px 10px rgba(0,0,0,0.2)!important;font-family:Arial,sans-serif!important}%23tutorpro360-logo{display:flex!important;align-items:center!important;gap:15px!important}%23tutorpro360-icon{width:50px!important;height:50px!important;background:%2300BCD4!important;border-radius:50%25!important;display:flex!important;align-items:center!important;justify-content:center!important;font-weight:bold!important;color:white!important;font-size:14px!important}%23tutorpro360-title{margin:0!important;color:white!important;font-size:28px!important;font-weight:bold!important;text-shadow:2px 2px 4px rgba(0,0,0,0.3)!important}%23tutorpro360-subtitle{margin:0!important;color:rgba(255,255,255,0.9)!important;font-size:14px!important}body{padding-top:100px!important;background:linear-gradient(135deg,%23f5f7fa 0%25,%23c3cfe2 100%25)!important}.login-dialog{border:2px solid %232143AF!important;border-radius:10px!important;box-shadow:0 10px 30px rgba(33,67,175,0.3)!important;background:white!important}.button,.btn,input[type=%22submit%22]{background-color:%232143AF!important;border-color:%232143AF!important;color:white!important}.button:hover,.btn:hover,input[type=%22submit%22]:hover{background-color:%2300BCD4!important;border-color:%2300BCD4!important}a{color:%232143AF!important}a:hover{color:%2300BCD4!important}%60;const styleSheet=document.createElement(%27style%27);styleSheet.textContent=tutorProCSS;document.head.appendChild(styleSheet);function createHeader(){const existingHeader=document.getElementById(%27tutorpro360-header%27);if(existingHeader){existingHeader.remove()}const header=document.createElement(%27div%27);header.id=%27tutorpro360-header%27;header.innerHTML=%60<div id=%22tutorpro360-logo%22><div id=%22tutorpro360-icon%22>360</div><div><h1 id=%22tutorpro360-title%22>TutorPro360</h1><p id=%22tutorpro360-subtitle%22>Educational Remote Access Platform</p></div></div>%60;document.body.insertBefore(header,document.body.firstChild)}function replaceText(){function replaceInNode(node){if(node.nodeType===Node.TEXT_NODE){let text=node.textContent;text=text.replace(/Apache Guacamole/gi,%27TutorPro360%27);text=text.replace(/Guacamole/gi,%27TutorPro360%27);node.textContent=text}else if(node.nodeType===Node.ELEMENT_NODE){if(node.title){node.title=node.title.replace(/Guacamole/gi,%27TutorPro360%27)}if(node.alt){node.alt=node.alt.replace(/Guacamole/gi,%27TutorPro360%27)}if(!node.id||!node.id.startsWith(%27tutorpro360-%27)){for(let i=0;i<node.childNodes.length;i++){replaceInNode(node.childNodes[i])}}}}replaceInNode(document.body)}createHeader();replaceText();console.log(%27✅ TutorPro360 branding applied!%27);const observer=new MutationObserver(function(mutations){let shouldUpdate=false;mutations.forEach(function(mutation){mutation.addedNodes.forEach(function(node){if(node.nodeType===Node.ELEMENT_NODE){shouldUpdate=true}})});if(shouldUpdate){setTimeout(()=>{if(!document.getElementById(%27tutorpro360-header%27)){createHeader()}replaceText()},100)}});observer.observe(document.body,{childList:true,subtree:true});setInterval(function(){if(!document.getElementById(%27tutorpro360-header%27)){createHeader()}replaceText()},5000)})();';document.head.appendChild(s);})();">🎓 Apply TutorPro360 Branding</a>
+        </div>
+        
+        <div class="instructions">
+            <h3>📋 How to use the bookmarklet:</h3>
+            <div class="step">
+                <span class="icon">1️⃣</span>
+                <strong>Drag the button above to your bookmarks bar</strong>
+            </div>
+            <div class="step">
+                <span class="icon">2️⃣</span>
+                <strong>Navigate to your TutorPro360 platform:</strong> http://10.0.7.161:30360
+            </div>
+            <div class="step">
+                <span class="icon">3️⃣</span>
+                <strong>Click the bookmarklet</strong> to apply TutorPro360 branding instantly
+            </div>
+            <div class="step">
+                <span class="icon">4️⃣</span>
+                <strong>Enjoy your branded TutorPro360 interface!</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>💻 Manual Method - Developer Console</h2>
+        <p>If you prefer to apply the branding manually, you can copy and paste this script into your browser's developer console:</p>
+        
+        <div class="instructions">
+            <div class="step">
+                <span class="icon">1️⃣</span>
+                <strong>Open Developer Tools:</strong> Press F12 or right-click and select "Inspect"
+            </div>
+            <div class="step">
+                <span class="icon">2️⃣</span>
+                <strong>Go to Console tab</strong>
+            </div>
+            <div class="step">
+                <span class="icon">3️⃣</span>
+                <strong>Copy and paste the script below:</strong>
+            </div>
+        </div>
+        
+        <div class="code" id="script-code">
+            Loading script...
+        </div>
+        
+        <button onclick="copyScript()" style="background: #2143AF; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 10px;">
+            📋 Copy Script to Clipboard
+        </button>
+    </div>
+
+    <div class="card">
+        <h2>🎨 What the branding includes:</h2>
+        <ul style="font-size: 16px; line-height: 1.8;">
+            <li><strong>Custom Header:</strong> TutorPro360 logo and branding at the top</li>
+            <li><strong>Color Scheme:</strong> Educational blue and cyan theme</li>
+            <li><strong>Text Replacement:</strong> All "Guacamole" references become "TutorPro360"</li>
+            <li><strong>Welcome Message:</strong> Educational-focused welcome content</li>
+            <li><strong>Responsive Design:</strong> Works on desktop and mobile devices</li>
+            <li><strong>Persistent Branding:</strong> Automatically reapplies when content changes</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h2>🔗 Access Your TutorPro360 Platform</h2>
+        <p>Your TutorPro360 educational remote access platform is available at:</p>
+        <div style="text-align: center; margin: 20px 0;">
+            <a href="http://10.0.7.161:30360" target="_blank" style="display: inline-block; background: #2143AF; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 18px;">
+                🚀 Open TutorPro360 Platform
+            </a>
+        </div>
+        <p style="text-align: center; color: #666;">
+            <strong>Default Login:</strong> guacadmin / guacadmin<br>
+            <em>Remember to change the default password after first login!</em>
+        </p>
+    </div>
+
+    <script>
+        // Load the script content
+        fetch('tutorpro360-browser-script.js')
+            .then(response => response.text())
+            .then(script => {
+                document.getElementById('script-code').textContent = script;
+            })
+            .catch(() => {
+                document.getElementById('script-code').textContent = 'Script file not found. Please use the bookmarklet method above.';
+            });
+        
+        function copyScript() {
+            const scriptElement = document.getElementById('script-code');
+            const textArea = document.createElement('textarea');
+            textArea.value = scriptElement.textContent;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            alert('✅ TutorPro360 branding script copied to clipboard!\n\nNow:\n1. Open your TutorPro360 platform\n2. Press F12 to open developer tools\n3. Go to Console tab\n4. Paste and press Enter');
+        }
+    </script>
+</body>
+</html>
