@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/component: tunnel
     app.kubernetes.io/part-of: tutorpro360-stack
 spec:
-  replicas: 5
+  replicas: 10
   selector:
     matchLabels:
       app.kubernetes.io/name: cloudflare-tunnel
@@ -23,6 +23,10 @@ spec:
         app.kubernetes.io/version: "latest"
         app.kubernetes.io/component: tunnel
         app.kubernetes.io/part-of: tutorpro360-stack
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "2000"
+        prometheus.io/path: "/metrics"
     spec:
       securityContext:
         runAsUser: 65532
@@ -50,8 +54,6 @@ spec:
           value: "quic"
         - name: TUNNEL_NO_AUTOUPDATE
           value: "true"
-        - name: TUNNEL_ORIGIN_SERVER_NAME
-          value: "tutorpro360-service.guacamole.svc.cluster.local"
         ports:
         - containerPort: 2000
           name: metrics
@@ -147,7 +149,7 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: cloudflare-tunnel
-  minReplicas: 5
+  minReplicas: 10
   maxReplicas: 10
   metrics:
   - type: Resource

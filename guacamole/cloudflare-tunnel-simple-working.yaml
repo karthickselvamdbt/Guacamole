@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/component: tunnel
     app.kubernetes.io/part-of: tutorpro360-stack
 spec:
-  replicas: 5
+  replicas: 10
   selector:
     matchLabels:
       app.kubernetes.io/name: cloudflare-tunnel
@@ -40,46 +40,10 @@ spec:
         - --token
         - eyJhIjoiMzBlMzc5ODkxMzU5YTI2ODQ1NmRlZTRiNGE3ZDBiYmIiLCJ0IjoiOWMwZTY1YmYtYjdmZC00ZTc4LTk4MDMtMzk0NDNmZjRjZTIyIiwicyI6IlkyRTNNV1k1TTJJdE9UazVZUzAwWVdFeUxXRXpOR0V0TkRNd09UWTBOVGhtT0dVMyJ9
         env:
-        - name: TUNNEL_METRICS
-          value: "0.0.0.0:2000"
         - name: TUNNEL_LOGFILE
           value: "/dev/stdout"
         - name: TUNNEL_LOGLEVEL
           value: "info"
-        - name: TUNNEL_TRANSPORT_PROTOCOL
-          value: "quic"
-        - name: TUNNEL_NO_AUTOUPDATE
-          value: "true"
-        - name: TUNNEL_ORIGIN_SERVER_NAME
-          value: "tutorpro360-service.guacamole.svc.cluster.local"
-        ports:
-        - containerPort: 2000
-          name: metrics
-          protocol: TCP
-        livenessProbe:
-          httpGet:
-            path: /ready
-            port: 2000
-          initialDelaySeconds: 30
-          periodSeconds: 30
-          timeoutSeconds: 10
-          failureThreshold: 3
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 2000
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 3
-        startupProbe:
-          httpGet:
-            path: /ready
-            port: 2000
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          timeoutSeconds: 5
-          failureThreshold: 30
         resources:
           requests:
             memory: "64Mi"
@@ -113,27 +77,6 @@ spec:
               topologyKey: kubernetes.io/hostname
 
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: cloudflare-tunnel-metrics
-  namespace: guacamole
-  labels:
-    app.kubernetes.io/name: cloudflare-tunnel
-    app.kubernetes.io/instance: cloudflare-tunnel
-    app.kubernetes.io/component: metrics
-spec:
-  type: ClusterIP
-  ports:
-  - port: 2000
-    targetPort: 2000
-    protocol: TCP
-    name: metrics
-  selector:
-    app.kubernetes.io/name: cloudflare-tunnel
-    app.kubernetes.io/instance: cloudflare-tunnel
-
----
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -147,7 +90,7 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: cloudflare-tunnel
-  minReplicas: 5
+  minReplicas: 10
   maxReplicas: 10
   metrics:
   - type: Resource
