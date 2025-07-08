@@ -1,0 +1,232 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: guacamole-advanced-config
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: guacamole
+    app.kubernetes.io/component: advanced-config
+data:
+  guacamole.properties: |
+    # PostgreSQL Database Configuration with Connection Pooling
+    postgresql-hostname: postgres-service
+    postgresql-port: 5432
+    postgresql-database: guacamole_db
+    postgresql-username: postgres
+    postgresql-password: postgresadmin123
+    postgresql-auto-create-accounts: true
+    
+    # Advanced Connection Pooling
+    postgresql-max-connections: 200
+    postgresql-max-connections-per-user: 20
+    postgresql-default-max-connections: 50
+    postgresql-default-max-group-connections: 100
+    
+    # Guacd Configuration with Load Balancing
+    guacd-hostname: guacd-service
+    guacd-port: 4822
+    guacd-ssl: false
+    
+    # Advanced Session Management
+    api-session-timeout: 7200000  # 2 hours
+    api-max-request-size: 52428800  # 50MB
+    
+    # Performance Optimizations
+    enable-websocket: true
+    websocket-timeout: 600000  # 10 minutes
+    
+    # Recording and Monitoring
+    recording-path: /var/lib/guacamole/recordings
+    recording-auto-create-path: true
+    recording-exclude-output: false
+    recording-exclude-mouse: false
+    recording-include-keys: true
+    
+    # Security Enhancements
+    skip-if-unavailable: postgresql
+    postgresql-absolute-max-connections: 300
+    
+    # Educational Platform Specific
+    extension-priority: postgresql
+    
+    # Advanced Logging
+    logback-level: INFO
+    
+  nginx.conf: |
+    upstream guacamole_backend {
+        least_conn;
+        server guacamole-working-0.guacamole-working-headless.guacamole.svc.cluster.local:8080 max_fails=3 fail_timeout=30s;
+        server guacamole-working-1.guacamole-working-headless.guacamole.svc.cluster.local:8080 max_fails=3 fail_timeout=30s;
+        server guacamole-working-2.guacamole-working-headless.guacamole.svc.cluster.local:8080 max_fails=3 fail_timeout=30s;
+        server guacamole-working-3.guacamole-working-headless.guacamole.svc.cluster.local:8080 max_fails=3 fail_timeout=30s;
+        server guacamole-working-4.guacamole-working-headless.guacamole.svc.cluster.local:8080 max_fails=3 fail_timeout=30s;
+        keepalive 32;
+    }
+    
+    upstream guacd_backend {
+        ip_hash;  # Session affinity
+        server guacd-stateful-0.guacd-headless.guacamole.svc.cluster.local:4822 max_fails=2 fail_timeout=10s;
+        server guacd-stateful-1.guacd-headless.guacamole.svc.cluster.local:4822 max_fails=2 fail_timeout=10s;
+        server guacd-stateful-2.guacd-headless.guacamole.svc.cluster.local:4822 max_fails=2 fail_timeout=10s;
+        keepalive 16;
+    }
+    
+    server {
+        listen 80;
+        server_name tutorpro360.local;
+        
+        # Security headers
+        add_header X-Frame-Options SAMEORIGIN;
+        add_header X-Content-Type-Options nosniff;
+        add_header X-XSS-Protection "1; mode=block";
+        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";
+        
+        # Compression
+        gzip on;
+        gzip_vary on;
+        gzip_min_length 1024;
+        gzip_types text/plain text/css application/json application/javascript text/xml application/xml;
+        
+        # WebSocket support
+        location /websocket-tunnel {
+            proxy_pass http://guacamole_backend;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_read_timeout 86400;
+        }
+        
+        # Main application
+        location / {
+            proxy_pass http://guacamole_backend;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_connect_timeout 30s;
+            proxy_send_timeout 30s;
+            proxy_read_timeout 30s;
+        }
+        
+        # Health check
+        location /health {
+            access_log off;
+            return 200 "healthy\n";
+            add_header Content-Type text/plain;
+        }
+    }
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/component: cache
+data:
+  redis.conf: |
+    # Redis configuration for session caching
+    maxmemory 256mb
+    maxmemory-policy allkeys-lru
+    
+    # Persistence
+    save 900 1
+    save 300 10
+    save 60 10000
+    
+    # Network
+    tcp-keepalive 300
+    timeout 0
+    
+    # Security
+    protected-mode yes
+    
+    # Performance
+    tcp-backlog 511
+    databases 16
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-cache
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: redis-cache
+    app.kubernetes.io/component: cache
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: redis
+      app.kubernetes.io/instance: redis-cache
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: redis
+        app.kubernetes.io/instance: redis-cache
+        app.kubernetes.io/component: cache
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+          name: redis
+        volumeMounts:
+        - name: redis-config
+          mountPath: /usr/local/etc/redis/redis.conf
+          subPath: redis.conf
+        command:
+        - redis-server
+        - /usr/local/etc/redis/redis.conf
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          tcpSocket:
+            port: 6379
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - redis-cli
+            - ping
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: redis-config
+        configMap:
+          name: redis-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: redis-cache
+spec:
+  type: ClusterIP
+  ports:
+  - port: 6379
+    targetPort: 6379
+    protocol: TCP
+    name: redis
+  selector:
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: redis-cache

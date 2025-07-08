@@ -1,0 +1,318 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tutorpro360-tls
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: tutorpro360
+    app.kubernetes.io/component: security
+type: kubernetes.io/tls
+data:
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0t  # Base64 encoded certificate
+  tls.key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0t  # Base64 encoded private key
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/component: backup
+spec:
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: postgres-backup
+            image: postgres:15
+            env:
+            - name: PGPASSWORD
+              value: "postgresadmin123"
+            command:
+            - /bin/bash
+            - -c
+            - |
+              DATE=$(date +%Y%m%d_%H%M%S)
+              BACKUP_FILE="/backups/tutorpro360_backup_$DATE.sql"
+              
+              echo "Starting backup at $(date)"
+              pg_dump -h postgres-service -U postgres -d guacamole_db > $BACKUP_FILE
+              
+              if [ $? -eq 0 ]; then
+                echo "Backup completed successfully: $BACKUP_FILE"
+                gzip $BACKUP_FILE
+                
+                # Keep only last 7 days of backups
+                find /backups -name "tutorpro360_backup_*.sql.gz" -mtime +7 -delete
+                
+                echo "Backup cleanup completed"
+              else
+                echo "Backup failed!"
+                exit 1
+              fi
+            volumeMounts:
+            - name: backup-storage
+              mountPath: /backups
+          volumes:
+          - name: backup-storage
+            persistentVolumeClaim:
+              claimName: backup-pvc
+          restartPolicy: OnFailure
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backup-pvc
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: tutorpro360
+    app.kubernetes.io/component: backup
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: security-config
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: tutorpro360
+    app.kubernetes.io/component: security
+data:
+  security.properties: |
+    # TutorPro360 Security Configuration
+    
+    # Session Security
+    session.timeout=7200
+    session.max.concurrent=5
+    session.ip.validation=true
+    
+    # Password Policy
+    password.min.length=8
+    password.require.uppercase=true
+    password.require.lowercase=true
+    password.require.numbers=true
+    password.require.symbols=false
+    password.max.age.days=90
+    
+    # Account Lockout
+    account.lockout.attempts=5
+    account.lockout.duration=300
+    
+    # Audit Logging
+    audit.log.enabled=true
+    audit.log.level=INFO
+    audit.log.connections=true
+    audit.log.authentication=true
+    
+    # Educational Platform Security
+    allow.guest.access=false
+    require.ssl=false
+    enable.session.recording=true
+    max.file.upload.size=50MB
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tutorpro360-service-account
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: tutorpro360
+    app.kubernetes.io/component: security
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: tutorpro360-role
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: tutorpro360
+    app.kubernetes.io/component: security
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "endpoints"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "statefulsets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["autoscaling"]
+  resources: ["horizontalpodautoscalers"]
+  verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: tutorpro360-role-binding
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: tutorpro360
+    app.kubernetes.io/component: security
+subjects:
+- kind: ServiceAccount
+  name: tutorpro360-service-account
+  namespace: guacamole
+roleRef:
+  kind: Role
+  name: tutorpro360-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: security-audit
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: tutorpro360
+    app.kubernetes.io/component: security-audit
+spec:
+  schedule: "0 1 * * 0"  # Weekly on Sunday at 1 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: tutorpro360-service-account
+          containers:
+          - name: security-audit
+            image: alpine/k8s:1.24.0
+            command:
+            - /bin/sh
+            - -c
+            - |
+              echo "=== TutorPro360 Security Audit Report ===" > /tmp/audit.log
+              echo "Date: $(date)" >> /tmp/audit.log
+              echo "" >> /tmp/audit.log
+              
+              echo "=== Pod Security Context ===" >> /tmp/audit.log
+              kubectl get pods -n guacamole -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.securityContext}{"\n"}{end}' >> /tmp/audit.log
+              echo "" >> /tmp/audit.log
+              
+              echo "=== Service Accounts ===" >> /tmp/audit.log
+              kubectl get serviceaccounts -n guacamole >> /tmp/audit.log
+              echo "" >> /tmp/audit.log
+              
+              echo "=== Network Policies ===" >> /tmp/audit.log
+              kubectl get networkpolicies -n guacamole >> /tmp/audit.log
+              echo "" >> /tmp/audit.log
+              
+              echo "=== Resource Quotas ===" >> /tmp/audit.log
+              kubectl get resourcequotas -n guacamole >> /tmp/audit.log
+              echo "" >> /tmp/audit.log
+              
+              echo "=== Pod Disruption Budgets ===" >> /tmp/audit.log
+              kubectl get poddisruptionbudgets -n guacamole >> /tmp/audit.log
+              echo "" >> /tmp/audit.log
+              
+              echo "Security audit completed at $(date)"
+              cat /tmp/audit.log
+          restartPolicy: OnFailure
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fail2ban-config
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: tutorpro360
+    app.kubernetes.io/component: security
+data:
+  jail.local: |
+    [DEFAULT]
+    bantime = 3600
+    findtime = 600
+    maxretry = 5
+    
+    [guacamole-auth]
+    enabled = true
+    port = 8080
+    protocol = tcp
+    filter = guacamole-auth
+    logpath = /var/log/guacamole/guacamole.log
+    maxretry = 3
+    bantime = 1800
+
+  filter.d/guacamole-auth.conf: |
+    [Definition]
+    failregex = ^.*Authentication attempt from <HOST> for user ".*" failed.*$
+    ignoreregex =
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backup-restore-scripts
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: tutorpro360
+    app.kubernetes.io/component: backup
+data:
+  backup.sh: |
+    #!/bin/bash
+    # TutorPro360 Backup Script
+    
+    DATE=$(date +%Y%m%d_%H%M%S)
+    BACKUP_DIR="/backups/tutorpro360_$DATE"
+    
+    echo "Creating backup directory: $BACKUP_DIR"
+    mkdir -p $BACKUP_DIR
+    
+    # Database backup
+    echo "Backing up PostgreSQL database..."
+    PGPASSWORD=postgresadmin123 pg_dump -h postgres-service -U postgres -d guacamole_db > $BACKUP_DIR/database.sql
+    
+    # Configuration backup
+    echo "Backing up configurations..."
+    kubectl get configmaps -n guacamole -o yaml > $BACKUP_DIR/configmaps.yaml
+    kubectl get secrets -n guacamole -o yaml > $BACKUP_DIR/secrets.yaml
+    kubectl get services -n guacamole -o yaml > $BACKUP_DIR/services.yaml
+    
+    # Compress backup
+    echo "Compressing backup..."
+    tar -czf $BACKUP_DIR.tar.gz -C /backups tutorpro360_$DATE
+    rm -rf $BACKUP_DIR
+    
+    echo "Backup completed: $BACKUP_DIR.tar.gz"
+
+  restore.sh: |
+    #!/bin/bash
+    # TutorPro360 Restore Script
+    
+    if [ -z "$1" ]; then
+      echo "Usage: $0 <backup_file.tar.gz>"
+      exit 1
+    fi
+    
+    BACKUP_FILE=$1
+    RESTORE_DIR="/tmp/restore_$(date +%Y%m%d_%H%M%S)"
+    
+    echo "Extracting backup: $BACKUP_FILE"
+    mkdir -p $RESTORE_DIR
+    tar -xzf $BACKUP_FILE -C $RESTORE_DIR
+    
+    # Restore database
+    echo "Restoring PostgreSQL database..."
+    PGPASSWORD=postgresadmin123 psql -h postgres-service -U postgres -d guacamole_db < $RESTORE_DIR/*/database.sql
+    
+    # Restore configurations
+    echo "Restoring configurations..."
+    kubectl apply -f $RESTORE_DIR/*/configmaps.yaml
+    kubectl apply -f $RESTORE_DIR/*/secrets.yaml
+    kubectl apply -f $RESTORE_DIR/*/services.yaml
+    
+    echo "Restore completed successfully"
+    rm -rf $RESTORE_DIR

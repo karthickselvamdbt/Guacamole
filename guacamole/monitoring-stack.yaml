@@ -1,0 +1,286 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/component: monitoring
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+    
+    rule_files:
+      - "tutorpro360_rules.yml"
+    
+    scrape_configs:
+    - job_name: 'kubernetes-pods'
+      kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names:
+          - guacamole
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        target_label: __address__
+    
+    - job_name: 'guacamole-metrics'
+      static_configs:
+      - targets: ['tutorpro360-service:80']
+      metrics_path: '/guacamole/api/session/data/postgresql/activeConnections'
+      scrape_interval: 30s
+    
+    - job_name: 'cloudflare-tunnel-metrics'
+      static_configs:
+      - targets: ['cloudflare-tunnel-metrics:2000']
+      scrape_interval: 30s
+    
+    - job_name: 'redis-metrics'
+      static_configs:
+      - targets: ['redis-service:6379']
+      scrape_interval: 30s
+
+  tutorpro360_rules.yml: |
+    groups:
+    - name: tutorpro360.rules
+      rules:
+      - alert: GuacamoleHighCPU
+        expr: rate(container_cpu_usage_seconds_total{pod=~"guacamole-working-.*"}[5m]) > 0.8
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Guacamole pod {{ $labels.pod }} high CPU usage"
+          description: "CPU usage is above 80% for more than 2 minutes"
+      
+      - alert: GuacdConnectionsHigh
+        expr: guacd_active_connections > 15
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Guacd pod {{ $labels.pod }} has high connections"
+          description: "Active connections: {{ $value }}"
+      
+      - alert: PostgreSQLConnectionsHigh
+        expr: postgresql_active_connections > 80
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL connection pool nearly exhausted"
+          description: "Active connections: {{ $value }}/100"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/component: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: prometheus
+    spec:
+      containers:
+      - name: prometheus
+        image: prom/prometheus:latest
+        ports:
+        - containerPort: 9090
+          name: prometheus
+        volumeMounts:
+        - name: prometheus-config
+          mountPath: /etc/prometheus
+        - name: prometheus-storage
+          mountPath: /prometheus
+        args:
+        - '--config.file=/etc/prometheus/prometheus.yml'
+        - '--storage.tsdb.path=/prometheus'
+        - '--web.console.libraries=/etc/prometheus/console_libraries'
+        - '--web.console.templates=/etc/prometheus/consoles'
+        - '--storage.tsdb.retention.time=7d'
+        - '--web.enable-lifecycle'
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+      volumes:
+      - name: prometheus-config
+        configMap:
+          name: prometheus-config
+      - name: prometheus-storage
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-service
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: prometheus
+spec:
+  type: NodePort
+  ports:
+  - port: 9090
+    targetPort: 9090
+    nodePort: 30090
+    protocol: TCP
+    name: prometheus
+  selector:
+    app.kubernetes.io/name: prometheus
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/component: visualization
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: grafana
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: grafana
+    spec:
+      containers:
+      - name: grafana
+        image: grafana/grafana:latest
+        ports:
+        - containerPort: 3000
+          name: grafana
+        env:
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          value: "tutorpro360admin"
+        - name: GF_INSTALL_PLUGINS
+          value: "grafana-kubernetes-app"
+        volumeMounts:
+        - name: grafana-storage
+          mountPath: /var/lib/grafana
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "300m"
+      volumes:
+      - name: grafana-storage
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-service
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: grafana
+spec:
+  type: NodePort
+  ports:
+  - port: 3000
+    targetPort: 3000
+    nodePort: 30030
+    protocol: TCP
+    name: grafana
+  selector:
+    app.kubernetes.io/name: grafana
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tutorpro360-dashboard
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/component: dashboard
+data:
+  tutorpro360-dashboard.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "TutorPro360 Educational Platform Dashboard",
+        "tags": ["tutorpro360", "education", "guacamole"],
+        "timezone": "browser",
+        "panels": [
+          {
+            "id": 1,
+            "title": "Active User Sessions",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "sum(guacamole_active_sessions)",
+                "refId": "A"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}
+          },
+          {
+            "id": 2,
+            "title": "Guacd Connections per Pod",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "guacd_active_connections",
+                "refId": "A"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 6, "y": 0}
+          },
+          {
+            "id": 3,
+            "title": "Resource Usage",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(container_cpu_usage_seconds_total{pod=~\"guacamole-working-.*\"}[5m])",
+                "refId": "A",
+                "legendFormat": "CPU - {{pod}}"
+              },
+              {
+                "expr": "container_memory_usage_bytes{pod=~\"guacamole-working-.*\"} / 1024 / 1024",
+                "refId": "B",
+                "legendFormat": "Memory - {{pod}}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+          }
+        ],
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "refresh": "30s"
+      }
+    }
