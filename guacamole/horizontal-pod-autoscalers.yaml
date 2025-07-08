@@ -1,17 +1,17 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: guacamole-hpa
+  name: guacamole-working-hpa
   namespace: guacamole
   labels:
     app.kubernetes.io/name: guacamole
-    app.kubernetes.io/instance: guacamole
+    app.kubernetes.io/instance: guacamole-working
     app.kubernetes.io/component: web-app
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: guacamole
+    name: guacamole-working
   minReplicas: 2
   maxReplicas: 10
   metrics:
