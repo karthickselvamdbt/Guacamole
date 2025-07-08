@@ -1,0 +1,115 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: guacd-service-with-affinity
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: guacd
+    app.kubernetes.io/instance: guacd
+    app.kubernetes.io/component: daemon
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+spec:
+  type: ClusterIP
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 3600  # 1 hour session timeout
+  ports:
+  - port: 4822
+    targetPort: 4822
+    protocol: TCP
+    name: guacd
+  selector:
+    app.kubernetes.io/name: guacd
+    app.kubernetes.io/instance: guacd
+
+---
+# Headless service for direct pod access
+apiVersion: v1
+kind: Service
+metadata:
+  name: guacd-headless
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: guacd
+    app.kubernetes.io/instance: guacd
+    app.kubernetes.io/component: daemon-headless
+spec:
+  type: ClusterIP
+  clusterIP: None  # Headless service
+  ports:
+  - port: 4822
+    targetPort: 4822
+    protocol: TCP
+    name: guacd
+  selector:
+    app.kubernetes.io/name: guacd
+    app.kubernetes.io/instance: guacd
+
+---
+# Individual services for each guacd pod (for advanced routing)
+apiVersion: v1
+kind: Service
+metadata:
+  name: guacd-pod-0
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: guacd
+    app.kubernetes.io/instance: guacd
+    app.kubernetes.io/component: daemon-pod-0
+spec:
+  type: ClusterIP
+  ports:
+  - port: 4822
+    targetPort: 4822
+    protocol: TCP
+    name: guacd
+  selector:
+    app.kubernetes.io/name: guacd
+    app.kubernetes.io/instance: guacd
+    statefulset.kubernetes.io/pod-name: guacd-0
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: guacd-pod-1
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: guacd
+    app.kubernetes.io/instance: guacd
+    app.kubernetes.io/component: daemon-pod-1
+spec:
+  type: ClusterIP
+  ports:
+  - port: 4822
+    targetPort: 4822
+    protocol: TCP
+    name: guacd
+  selector:
+    app.kubernetes.io/name: guacd
+    app.kubernetes.io/instance: guacd
+    statefulset.kubernetes.io/pod-name: guacd-1
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: guacd-pod-2
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: guacd
+    app.kubernetes.io/instance: guacd
+    app.kubernetes.io/component: daemon-pod-2
+spec:
+  type: ClusterIP
+  ports:
+  - port: 4822
+    targetPort: 4822
+    protocol: TCP
+    name: guacd
+  selector:
+    app.kubernetes.io/name: guacd
+    app.kubernetes.io/instance: guacd
+    statefulset.kubernetes.io/pod-name: guacd-2

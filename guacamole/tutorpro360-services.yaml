@@ -53,10 +53,16 @@ metadata:
   namespace: guacamole
   labels:
     app.kubernetes.io/name: guacd
-    app.kubernetes.io/instance: guacd
+    app.kubernetes.io/instance: guacd-stateful
     app.kubernetes.io/component: daemon
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
 spec:
   type: ClusterIP
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 3600  # 1 hour session timeout
   ports:
   - port: 4822
     targetPort: 4822
@@ -64,4 +70,4 @@ spec:
     name: guacd
   selector:
     app.kubernetes.io/name: guacd
-    app.kubernetes.io/instance: guacd
+    app.kubernetes.io/instance: guacd-stateful

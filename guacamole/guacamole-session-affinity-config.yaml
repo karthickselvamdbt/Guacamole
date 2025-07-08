@@ -1,0 +1,107 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: guacamole-session-config
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: guacamole
+    app.kubernetes.io/component: config
+data:
+  guacamole.properties: |
+    # PostgreSQL Database Configuration
+    postgresql-hostname: postgres-service
+    postgresql-port: 5432
+    postgresql-database: guacamole_db
+    postgresql-username: postgres
+    postgresql-password: postgresadmin123
+    postgresql-auto-create-accounts: true
+    
+    # Guacd Configuration with Session Affinity
+    guacd-hostname: guacd-session-affinity
+    guacd-port: 4822
+    guacd-ssl: false
+    
+    # Session Management for User-to-Guacd Affinity
+    # Enable session recording and management
+    recording-path: /var/lib/guacamole/recordings
+    recording-auto-create-path: true
+    
+    # Connection pooling and session management
+    postgresql-max-connections: 100
+    postgresql-max-connections-per-user: 10
+    
+    # Session timeout (1 hour to match guacd session affinity)
+    api-session-timeout: 3600000
+    
+    # Enable detailed logging for session tracking
+    logback-level: INFO
+    
+    # Custom properties for session affinity
+    enable-websocket: true
+    websocket-timeout: 300000
+    
+    # User session management
+    skip-if-unavailable: postgresql
+    
+  logback.xml: |
+    <configuration>
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+        
+        <!-- Log session and connection information -->
+        <logger name="org.apache.guacamole.tunnel" level="INFO"/>
+        <logger name="org.apache.guacamole.websocket" level="INFO"/>
+        <logger name="org.apache.guacamole.net.basic" level="INFO"/>
+        
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </configuration>
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: guacamole-session-script
+  namespace: guacamole
+  labels:
+    app.kubernetes.io/name: guacamole
+    app.kubernetes.io/component: script
+data:
+  session-affinity.sh: |
+    #!/bin/bash
+    
+    # Session Affinity Script for Guacamole-Guacd Connection Management
+    echo "Starting Guacamole with Session Affinity Configuration..."
+    
+    # Get user session information
+    USER_SESSION_ID="${GUACAMOLE_USER_SESSION:-$(hostname)}"
+    
+    # Calculate which guacd instance to use based on session
+    GUACD_INSTANCE=$(($(echo -n "$USER_SESSION_ID" | cksum | cut -d' ' -f1) % 3))
+    
+    # Set the appropriate guacd service
+    case $GUACD_INSTANCE in
+        0)
+            export GUACD_HOSTNAME="guacd-0.guacd-headless.guacamole.svc.cluster.local"
+            echo "Routing to guacd-0 for session: $USER_SESSION_ID"
+            ;;
+        1)
+            export GUACD_HOSTNAME="guacd-1.guacd-headless.guacamole.svc.cluster.local"
+            echo "Routing to guacd-1 for session: $USER_SESSION_ID"
+            ;;
+        2)
+            export GUACD_HOSTNAME="guacd-2.guacd-headless.guacamole.svc.cluster.local"
+            echo "Routing to guacd-2 for session: $USER_SESSION_ID"
+            ;;
+    esac
+    
+    echo "Session $USER_SESSION_ID will use guacd instance: $GUACD_HOSTNAME"
+    
+    # Update guacamole.properties with the specific guacd instance
+    sed -i "s/guacd-hostname:.*/guacd-hostname: $GUACD_HOSTNAME/" /home/guacamole/.guacamole/guacamole.properties
+    
+    echo "Session affinity configured successfully"
