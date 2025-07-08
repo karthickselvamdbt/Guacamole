@@ -334,3 +334,11 @@ spec:
       port: 443
     - protocol: TCP
       port: 80
+    - protocol: TCP
+      port: 3389
+    - protocol: TCP
+      port: 22
+    - protocol: TCP
+      port: 5900
+    - protocol: TCP
+      port: 5901
